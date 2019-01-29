@@ -1,0 +1,152 @@
+\newcommand{\CLASSINPUTbottomtextmargin}{1in}
+\documentclass[letterpaper,onecolumn,draftcls]{IEEEtran}
+%\documentclass[conference,a4paper]{IEEEtran}
+\usepackage[ruled,vlined,linesnumbered]{algorithm2e}
+\usepackage[noend]{algpseudocode}
+\input{preamble}
+\SetKwProg{myfn}{function}{:}{end}
+\SetKwFunction{MinNormBase}{MinNormBase}
+\DontPrintSemicolon
+\SetAlgoLined
+\SetKwFunction{FirstClusters}{FirstClusters}
+\SetKwFunction{Agglomerate}{Agglomerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{blkarray}
+%\newcommand*\circled[1]{\tikz[baseline=(char.base)]{
+%            \node[shape=circle,draw,inner sep=2pt] (char) {#1};}}
+\newcommand\circled[1]{%
+  \tikz[baseline=(X.base)] 
+    \node (X) [draw, dashed, shape=circle, inner sep=0] {\strut $#1$};}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\title{Agglomerative Info-Clustering}
+\author{Chung Chan, Ali Al-Bashabsheh and Qiaoqiao Zhou
+	\thanks{C.\ Chan (corresponding author, email:
+          chung.chan@cityu.edu.hk) is with the Department of Computer Science, City University of Hong Kong. His work was supported in part by a grant
+          from the University Grants Committee of the Hong Kong Special Administrative Region,
+          China (Project No. 14200714) and in part by a grant from
+          City University of Hong Kong (Project No. 7200564).}
+        \thanks{A. Al-Bashabsheh is with the Big Data and Brain
+          Computing (BDBC) center at Beihang University, Beijing, China (e-mail:
+          entropyali@gmail.com).}
+        \thanks{Q.\ Zhou is with the Institute of Network Coding and the Department of Information Engineering, the Chinese University of Hong Kong.
+	}
+	}
+
+\begin{document}
+
+%\setlength{\abovedisplayskip}{4.8pt}
+%\setlength{\belowdisplayskip}{4.8pt}
+
+%\include{mnotes}
+\IEEEoverridecommandlockouts
+%\nocite{add}
+\maketitle
+
+\begin{abstract}
+We show that correlated random variables can be clustered more efficiently in an agglomerative manner rather than a divisive one. The agglomerative approach successively merges subsets of random variables sharing a large amount of normalized total correlation. Compared to the existing divisive approach that successively segregates the random variables into subsets with increasing multivariate mutual information, the agglomerative approach gives the same hierarchy of clusters faster by an order of magnitude.  The underlying results justifying the agglomerative approach are also of theoretical interest since they reveal a fundamental connection between the well-known total correlation and the recently proposed multivariate mutual information.
+\end{abstract} 
+
+%\begin{keywords}
+%multivariate mutual information; clustering; principal sequence of partitions; principal sequence; minimum norm base
+%\end{keywords}
+
+%Suggested notations: $`g_\ell$, $\mcP_{\ell}$, $I^*(\RZ_V)$, $\pzC^*(\RZ_V)$, $\pzC_{`g}(\RZ_V)$, $\mcP^*(\RZ_V)$, $`l^*_i(f)$, $\norm{x_V}$.
+
+\input{intro}
+
+\input{formulation}
+
+
+
+%We end this section with a brief discussion on the Dilworth truncation and an equivalent
+%characterization of the MMI to \eqref{eq:mmi}.
+%\textcolor{red}{aaa-continue!}
+%%%%%%%%%%%%%%
+%The multivariate mutual information (MMI) is characterized in~\cite{chan15mi} as the
+%smallest value of $`g\in `R$ such that the \emph{residual~independence relation (RIR)} holds, i.e.,
+%for some partition $\mcP\in \Pi'(V)$,
+%\begin{subequations}
+%\begin{alignat}{2}
+%	\label{eq:RIR}
+%	h_{`g}(V) &= \sum_{C\in\mcP} h_{`g}[\mcP] &\kern1em& \text {where}\\
+%	h(B)&:=H(\RZ_B) && \text{for } B\subseteq V, \label{eq:h}\\
+%	h_{`g}(B)&:= h(B)-`g && \text{and} \label{eq:residualH}\\
+%	h_{`g}[\mcP] &:= \sum\nolimits_{C\in \mcP} h_{`g}(C) && \text{for $\mcP\in \Pi (V)$}. \label{eq:DT:2} 
+%\end{alignat}
+%\end{subequations}
+%Here, $h$ is the entropy function and $h_{`g}(B)$ is the \emph{residual entropy/randomness} of
+%$\RZ_B$ after removing $`g$. The l.h.s.\ of \eqref{eq:RIR} is the total residual randomness of the
+%entire set of random variables, and the r.h.s.\ is the sum of the individual residual randomness of
+%a partition of the random variables. The equality means that there is independence (no double
+%counting) in the individual residual randomness, i.e., $`g$ is the amount of mutual randomness whose
+%removal leads to an independence relation.
+%%%%%%%%%%%%%%%%%%%%%
+%%More explicitly, the MMI, denoted as $I(\RZ_V)$, can equivalently be written as
+%This characterization is equivalent to the followoing (explicit) formulation of the MMI, denoted as $I(\RZ_V)$, can be written as
+%%%%%%%%%%%%%%
+
+\input{divisive}
+
+
+\input{norm}
+
+
+\input{agglomerative}
+
+\input{complexity}
+
+\input{conc}
+
+%
+%%It will be interesting to compare their performances 
+%%We also note that the info-clustering algorithm can also be used to compute the solution of some related problems such as the optimal discussion rate tuple for successive omniscience~\cite{chan16so}.
+
+%\input{comments3}
+
+%\bibliographystyle{IEEEtran}
+%\bibliography{IEEEabrv,ref}
+
+%\input{aaa-catchall.tex}
+
+%\bibliographystyle{IEEEtran}
+%\bibliography{IEEEabrv,ref}
+%\end{document}
+
+%\clearpage
+%\newpage
+\appendices
+
+\makeatletter
+\@addtoreset{equation}{section}
+\renewcommand{\theequation}{\thesection.\arabic{equation}}
+\renewcommand{\theparentequation}{\thesection.\arabic{parentequation}}
+\@addtoreset{Theorem}{section}
+\renewcommand{\theTheorem}{\thesection.\arabic{Theorem}}
+\@addtoreset{Lemma}{section}
+\renewcommand{\theLemma}{\thesection.\arabic{Lemma}}
+\@addtoreset{Corollary}{section}
+\renewcommand{\theCorollary}{\thesection.\arabic{Corollary}}
+\@addtoreset{Example}{section}
+\renewcommand{\theExample}{\thesection.\arabic{Example}}
+\@addtoreset{Remark}{section}
+\renewcommand{\theRemark}{\thesection.\arabic{Remark}}
+\@addtoreset{Proposition}{section}
+\renewcommand{\theProposition}{\thesection.\arabic{Proposition}}
+\@addtoreset{Definition}{section}
+\renewcommand{\theDefinition}{\thesection.\arabic{Definition}}
+\@addtoreset{Subclaim}{Theorem}
+\renewcommand{\theSubclaim}{\theLemma.\arabic{Subclaim}}
+\makeatother
+
+\input{dilworth}
+
+\input{proofs}
+
+
+\bibliographystyle{IEEEtran}
+\bibliography{IEEEabrv,ref}
+
+\end{document}

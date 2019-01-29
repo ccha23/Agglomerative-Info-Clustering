@@ -1,0 +1,563 @@
+\section{Main results}
+
+Instead of the divisive approach, we consider here an agglomerative approach, 
+%Algorithm~\ref{alg:aic}, that computes $`g_{\ell}$ and $\mcP_{\ell}$ iteratively from $\ell=N$
+Algorithm~\ref{alg:aic}, that computes $`g_{\ell}$ and $\mcP_{\ell}$ by iteratively producing coarser partitions from finer ones, i.e., from $\mcP_N$ to $\mcP_1$. 
+(Note that $N$ needs not be known a priori.)
+%We will give an efficient implementation of the subroutine \Agglomerate in Algorithm~\ref{algo:fuse}
+%that computes $`g_\ell$ and $\mcP_{\ell-1}$ from $\mcP_{\ell}$ for any $\ell$, hence resolving the
+%inefficiency of the divisive approach while returning the clusters in order.  In particular, we will
+%show that it suffices to compute
+We will give an efficient implementation (thereby resolving the inefficiency of the divisive
+approach) of the subroutine \Agglomerate in Algorithm~\ref{algo:fuse} that computes $`g_\ell$ and
+$\mcP_{\ell-1}$ from $\mcP_{\ell}$ for any $\ell$ (thereby returning the clusters in the desired order).
+In particular, we will show that it suffices to compute
+\begin{subequations}
+	\label{eq:IC*}
+\begin{align}
+	I^*(\RZ_V)&:=\max\{I(\RZ_{C})\mid C\subseteq V, \abs {C} > 1\} \kern1em \text{ and}\label{eq:I*}\\
+	\begin{split}
+	\pzC^*(\RZ_V)&:=\op{maximal}\{C\subseteq V \mid \abs{C} > 1, \\
+	&\kern8em I(\RZ_C) = I^{*}(\RZ_{V})  \},
+	\end{split}\label{eq:C*}
+\end{align}
+\end{subequations}
+which are, respectively, the last critical value $`g_{N}$  \cite[Theorem~1]{chan16cluster} and the last set of clusters (i.e., the non-singleton elements of the second last
+partition $\mcP_{N-1}$).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%These quantities turn out to have a fundamental connection
+%with the normalized total correlation~\eqref{eq:JT}, which gives rise to the efficient
+%implementation.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Recall 
+%the MMI 
+%as in~
+\eqref{eq:I} 
+and note that 
+if the partition $\mcP=\Set {\Set {i}\mid i\in V}$ is
+optimal
+%to \eqref{eq:I},
+then the MMI is equal to
+\begin{align}
+	\label{eq:JT}
+	\begin{split}
+		J_{\opT}(\RZ_V)
+		&:=I_{\Set{\Set{i}\mid i\in V}}(\RZ_V)\\
+		%&=\frac1 {\abs{V}-1}`1[\sum\nolimits_{i \in V}H(\RZ_i)-H(\RZ_V)`2],
+		&=\frac1 {\abs{V}-1}`1[\sum\nolimits_{i \in V}h(\Set{i})-h(V)`2],
+	\end{split}
+\end{align}
+which is the normalized version (see~\cite{chan15mi} for more details) of
+the well-known Watanabe's total correlation~\cite{watanabe60}.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+The quantities $I^{*}$ and $\pzC^{*}$ turn out to have a fundamental connection
+with the normalized total correlation~\eqref{eq:JT}, which leads to the desired efficient
+implementation.
+
+
+\label{sec:results}
+%\input{results}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{algorithm}
+	\caption{Agglomerative info-clustering.}
+	\label{alg:aic}
+	\KwData{Statistics of $\RZ_V$ sufficient for calculating the entropy function $h(B)$ for
+		$B\subseteq V:=\{1,\ldots,n\}$.}
+	\KwResult{Two arrays \DataSty{L} and \DataSty{PSP} that contain the $`g_{\ell}$'s and $\mcP_{\ell}$'s
+		in Proposition~\ref{prop:clusters}. More precisely,
+		for $1\leq \ell \leq N$, the entries of the arrays
+		\DataSty{L}
+		and
+		\DataSty{PSP}
+		are 
+		\DataSty{L}$[s] = `g_{\ell}$
+		and
+		\DataSty{PSP}$[s] = \mcP_{\ell}$
+		for $s = |\mcP_{\ell}|$, 
+		and are null otherwise.}
+	\BlankLine
+	\DataSty{L}, \DataSty{PSP}$\leftarrow$ empty arrays, each of length $n$;\;
+	\DataSty{PSP}$[n]$ $\leftarrow \{\{i\}:i\in V\}$, $s\leftarrow n$;\;
+	\While{$s>1$}{
+		$(`g,\mcP')\leftarrow$ $\Agglomerate($\DataSty{PSP}$[s])$;\;
+		\DataSty{L}$[s]\leftarrow `g$;
+		$s\leftarrow |\mcP'|$;
+		\DataSty{PSP}$[s]\leftarrow \mcP'$;\;
+	}
+	% 	\BlankLine
+	%   	\myfn{\Agglomerate{$\mcP$}}{
+	%			assume $\mcP=\mcP_{\ell}$ for $1\leq \ell\leq N$ in Proposition~\ref{prop:clusters};\;
+	%			\KwRet $(`g,\mcP_{\ell}) \leftarrow (`g_{\ell},\mcP_{\ell-1})$;
+	%   	}
+	%	\textcolor{red}{---needs revision, particularly the function fuse.}
+\end{algorithm}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The main result is the implementation of \Agglomerate in Algorithm~\ref{algo:fuse} that computes the
+PSP, and so the info-clustering solution, iteratively from finer partitions to coarser
+ones. This is done by computing the PS using a subroutine \MinNormBase that computes the minimum
+norm base for \eqref{eq:MNB}. An explicit implementation of \MinNormBase can be found in
+\cite{fujishige11} using Wolfe's minimum norm point algorithm.
+%The current abstraction also allows further approximations or simplifications for special source models as in \cite{chan16cluster}. 
+
+\begin{algorithm}
+	\caption{Implementation of \texttt{Agglomerate}.}% in Algorithm~\ref{alg:aic}.}
+	\label{algo:fuse}
+	%	\KwData{Statistics of $\RZ_V$ sufficient for calculating \FirstClusters{$B$} for all $B\subseteq V:\abs{B}>1$.}
+	%	\KwResult{$\mcS$ is a list of $(I(\RZ_C),C)$ for $C\in \pzC(\RZ_V)$, which gives
+	%		$\Upgamma(\RZ_V)=\Set{`g' \mid (`g',B)\in \mcS}$ and
+	%		$\pzC_{`g}(\RZ_V)=\op{maximal}\Set{B\mid (`g',B)\in \mcS,`g'>`g}$.}
+	%	\BlankLine
+	\BlankLine
+	\KwData{$\mcP$ is equal to $\mcP_{\ell}$ for some $1\leq \ell\leq N$ in \eqref{eq:PSP}.} %Proposition~\ref{prop:clusters}.}
+	\KwResult{$(`g,\mcP')$ is equal to $(`g_\ell,\mcP_{\ell-1})$.}
+	%\myfn{\Agglomerate{$\mcP$}}{
+		Enumerate $\mcP$ as $\Set{C_1,\dots,C_k}$ for some $k>1$ and disjoint $C_i$'s;\;
+		\DataSty{x}$\leftarrow$ empty array of size $k$;\;
+		\For{$j = 1$ \emph{\KwTo} $k$ }{
+			%\DataSty{x}[$j$]=\MinNormBase($ B\mapsto h`1(\bigcup_{i\in B\cup\Set{j}}C_i`2)-\sum_{i\in B\cup\Set{j}}h(C_i),\Set{j+1,\ldots,k}$);\; \label{ln:MNB:1}
+			Define $g_j$ as the function $ B\subseteq \{j+1,\dots,k\}  \mapsto h`1(\bigcup_{i\in B\cup\Set{j}}C_i`2)-\sum_{i\in B\cup\Set{j}}h(C_i)$;\; 
+			\DataSty{x}[$j$]=\MinNormBase($g_j,\Set{j+1,\ldots,k}$);\; \label{ln:MNB:1}
+		}
+		%\KwRet $(\upgamma_1(\RZ_B),\pzC_{\upgamma_1}(\RZ_B))$;
+		$\displaystyle`g\leftarrow -\min_{i,j:1\leq j<i\leq k}\DataSty{x}[j][i]$,\kern1em$\mcP'\leftarrow`0$;\;
+		\For{$j = 1$ \emph{\KwTo} $k$ }{
+			\If{$C_j\nsubseteq \bigcup\mcP'$}{
+				%add $\Set{C_j}\cup\Set{C_i\mid i\kern-.25em\in\kern-.25em\Set{j\kern-.25em +\kern-.25em 1,\dots,k}, \DataSty{x}[j][i]\kern-.25em\leq\kern-.25em -`g}$ to $\mcP'$;\;
+				add $C_j \cup \bigcup\Set{C_i\mid i\kern-.25em\in\kern-.25em\Set{j\kern-.25em
+				+\kern-.25em 1,\dots,k}, \DataSty{x}[j][i]\kern-.25em\leq\kern-.25em -`g}$ to $\mcP'$;\;
+				%\tcc{see below \eqref{} for the notation ``$\bigcup$''}
+			}
+%			\If{$C_j\not\in \bigcup_{C\in \mcP'}C'$}{
+%				add $\Set{C_j}\cup\Set{C_i\mid i\kern-.25em\in\kern-.25em\Set{j\kern-.25em +\kern-.25em 1,\dots,k}, \DataSty{x}[j][i]\kern-.25em\leq\kern-.25em -`g}$ to $\mcP'$;\;
+%			}
+			
+		}
+		
+	%}
+	\myfn{\MinNormBase($f,U$)}{
+		%\tcc{ assume normalized submodular function $f:2^U\mapsto`R$ }
+		\KwRet an array \DataSty{x} (indexed by $U$) that solves~\eqref{eq:MNB}.
+	}
+\end{algorithm}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%The complexity of the algorithm is mainly due to the computation of the minimum norm base in
+%line~\ref{ln:MNB:1}.
+%%The number of such computation is at most $n$.
+%This computation is repeated at most $n$ times.
+%With $\op{MNB}(n)$ being
+%the complexity of the minimum norm base algorithm for ground set of size $n$, \Agglomerate runs in
+%time $O(n\op{MNB}(n))$. Since the agglomerative info-clustering algorithm in
+%Algorithm~\ref{alg:aic} invokes function \Agglomerate $N-1\leq n-1$ times, it runs in time
+%$O(n^2 \op{MNB}(n))$, which is equivalent to that of~\cite[Algorithm~3]{chan16cluster},
+%assuming that the submodular function minimization therein is implemented by the minimum norm base
+%algorithm, i.e., with $\op{SFM}=\op{MNB}$. The divisive info-clustering algorithm
+%in~\cite[Algorithm~2]{chan16cluster} makes $N-1$ calls to a subroutine that calculates the
+%fundamental partition. However, computing the fundamental partition appears to take time
+%$O(n^2 \op{MNB}(n))$, which would lead to an overall complexity of $O(n^3
+%\op{MNB}(n))$ for the divisible clustering. Hence, the agglomerative info-clustering is
+%more efficient.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+To explain Algorithm~\ref{algo:fuse}, we need the following two fundamental results that
+\begin{inparaenum}
+\item 
+relate the last critical value of a set of RVs to the normalized total correlation and,
+%as a result,
+consequently,
+to the minimum norm base; and
+\item 
+relate any critical value of a set of RVs to the last critical value of a set of agglomerated RVs.
+\end{inparaenum}
+Each theorem will be illustrated with an example. %that is followed by a proof sketch.
+The statements of the results may be
+skimmed first and read more carefully as we go through the examples.
+%The detailed proofs can be found in~\cite{chan17aic}.
+
+\begin{Theorem}
+	\label{thm:JT}
+	With $V:= \{1,\ldots, n\}$ and $h$~\eqref{eq:h} denoting the entropy function of $\RZ_V$, let,
+	for any $j\in V$,
+	\begin{align*}
+		U_j &:=\Set {i\in V\mid i>j} \kern0em \text{ and } \\ %\text{ assuming $V$ is ordered.}\\
+	g_j(B) &:= h(B\cup \Set {j})-\sum\nolimits_{i\in B\cup \Set {j}} h(\Set {i}) \kern1em \text {for }B\subseteq U_j,
+	\end{align*}
+	which is a normalized submodular function. Then,
+	\begin{subequations}
+		\begin{align}
+		I^*(\RZ_V)&=\max_{C\subseteq V:\abs{C}> 1} J_{T}(\RZ_C) \label{eq:maxJT}\\
+		&= -\min_{j\in V} \min_{i\in U_j} x^{(j)}_i \label{eq:maxJT:x}\\ \nextParentEquation
+		\pzC^*(\RZ_V)&=\op{maximal}
+		\argmax_{C\subseteq V:\abs{C}> 1} J_{T}(\RZ_C)
+		\label{eq:argmaxJT}\\
+		&=\op{maximal} 
+		`1\{`1.\Set{j^*}\cup 
+		\argmin_{i\in U_{j^*}} x^{(j^*)}_i `2|`2.  \notag\\
+		&\kern6.5em 
+		`1.j^*\in \argmin_{j\in V} `1( \min_{i\in U_{j}} x^{(j)}_i `2)
+		`2\},\label{eq:argmaxJT:x}
+		\end{align}
+	\end{subequations}
+	where $x^{(j)}_{U_{j}}$ is the minimum norm base for $g_j$~\eqref{eq:MNB}.
+\end{Theorem}
+\begin{Proof}
+	See Appendix~\ref{sec:proof}.
+\end{Proof}
+
+\begin{example}
+	\label{eg:IC*}
+	%As an illustration of Theorem~\ref{thm:JT}, 
+	Consider our running example~\eqref{eq:eg-motivate}
+	with $V = \Set{1,\ldots,6}$. By brute-force search, the maximum normalized total correlation in
+	\eqref{eq:maxJT} is $J_{\opT}(\RZ_{\Set {1,2}})=2$ achieved uniquely by $C=\Set {1,2}$. Hence,
+	\eqref{eq:maxJT} and \eqref{eq:argmaxJT} give, respectively, $I^*(\RZ_V)=2$ and $\pzC^*(\RZ_V)=\Set {\Set
+		{1,2}}$, which correspond to the last critical value and last set of clusters
+		in \eqref{eq:eg-clusters}, as desired by the definitions of $I^*$ and $\pzC^*$ in
+		\eqref{eq:IC*}. 
+	
+	To illustrate \eqref{eq:maxJT:x} and \eqref{eq:argmaxJT:x},  
+	the minimum norm base $x_{U_{j}}^{(j)}$ of $g_{j}$, for different values of $j$, is calculated as:
+	\begin{align*}
+	x_{U_j}^{(j)} =
+	\scalebox{0.8}{
+		\begin{blockarray}{lcc ccl c}
+		\phantom{n}1 &	2 & 3 & 4 & 5 & 6 \\
+		\begin{block}{\{lcc ccc c}
+		(&	\circled{-2}, & -1, & -0.5, & -0.5, & 0),   & j=1 \\
+		(&	   & -1,  & -0.5, & -0.5, & 0),   & j=2 \\
+		(&	   &      & -0.5, & -0.5, & 0),   & j=3 \\
+		(&	   &      &      & -1,   & 0),   & j=4 \\
+		(&	   &      &      &      & 0),   & j=5. \\
+		\end{block}
+		\end{blockarray}}
+	\end{align*}
+%	For instance, when $j=4$, we have $U_j=\Set {5,6}$, $g_j(`0)=h(\Set {j})-h(\Set {j})=0$ and
+%	$g_j(\Set {5})=h(\Set {4,5})-h(\Set {4})-h(\Set {5})=-I(\RZ_4\wedge \RZ_5)=-1$. Similarly,
+%	$g_j(\Set {6})=-I(\RZ_4\wedge \RZ_6)=0$. $g_j(\Set {5,6})=h(\Set {4,5,6})-h(\Set {4})-h(\Set
+%	{5})-h(\Set {6})=-1$. From \eqref{eq:PB}, $\rmP(g_j)=\Set {(x_5,x_6)\in `R^2\mid x_5\leq -1,
+%	x_6\leq 0}$ and so $\rmB(g_j)=\Set {(-1,0)}$ contains a unique base, which is  therefore the
+%	minimum norm base trivially. 
+%%
+%	For instance, when $j=4$, we have $U_j=\Set {5,6}$ and $g_j(`0)=0$,
+%	$g_j(\Set {5})=h(\Set {4,5})-h(\Set {4})-h(\Set {5})=-I(\RZ_4\wedge \RZ_5)=-1$,
+%	$g_j(\Set {6})=-I(\RZ_4\wedge \RZ_6)=0$, and $g_j(\Set {5,6})=h(\Set {4,5,6})-h(\Set {4})-h(\Set
+%	{5})-h(\Set {6})=-1$. From \eqref{eq:PB}, $\rmP(g_j)=\Set {(x_5,x_6)\in `R^2\mid x_5\leq -1,
+%	x_6\leq 0}$, and so $\rmB(g_j)=\Set {(-1,0)}$ contains a unique base, which is  therefore the
+%	minimum norm base trivially. 
+%	
+	Now, the minimum in \eqref{eq:maxJT:x} is equal to $-2$ (circled above), which is achieved uniquely by $j=1$ and $i=2$. This gives $I^*(\RZ_V)=-(-2)=2$ as desired. In \eqref{eq:argmaxJT:x}, we have $j^*\in \Set {1}$ and $\argmin_{i\in U_{j^*}} x_i^{(j^*)}=\Set {2}$. Hence, $\pzC^*(\RZ_V)=\op{maximal}\Set {\Set {1}\cup \Set {2}}=\Set {\Set {1,2}}$ as desired.	
+	%
+\end{example}
+
+
+We remark that \eqref{eq:maxJT} and~\eqref{eq:argmaxJT} eliminate the need for minimization over
+partitions in calculating the MMI in~\eqref{eq:I*} and~\eqref{eq:C*}. They serve as an intermediate
+step that leads to \eqref{eq:maxJT:x} and \eqref{eq:argmaxJT:x}, thereby relating the last critical value \eqref{eq:I*} and the last set of clusters 
+\eqref{eq:C*} to the minimum norm base. 
+
+%\begin{Proof}[Sketch for Theorem~\ref{thm:JT}]
+%	
+%\eqref{eq:maxJT} and \eqref{eq:argmaxJT} can be proved by showing that the optimal partition for any
+%maximizer $C$ to \eqref{eq:I*}  is the partition $\Set {\Set {i}\mid i\in C}$ into singletons, in
+%which case $I(\RZ_C)=J_{\opT}(\RZ_C)$. 
+%%\eqref{eq:maxJT} and \eqref{eq:argmaxJT} can be proved by showing that,
+%%for any maximizer $C$ to \eqref{eq:I*}, 
+%%the optimal partition achieving $I(\RZ_{C})$
+%%is the partition $\Set {\Set {i}\mid i\in C}$ into singletons, and so $I(\RZ_C)=J_{\opT}(\RZ_C)$. 
+%
+%To obtain the minimum norm base formulation in \eqref{eq:maxJT:x} and \eqref{eq:argmaxJT:x}, the
+%important step is to rewrite \eqref{eq:maxJT} as
+%%\begin{align*}
+%%0&=\min_{C\subseteq V:\abs{C}>1}`g^*-J_{\op{T}}(\RZ_C)\\
+%%&=\min_{C\subseteq V:\abs{C}>1}(\abs{C}-1)`g^*+h(C)-\sum_{i\in C}h(\Set{i})  \\
+%%&=\min_{j\in V}\min_{B\subseteq U_j:\abs{B}\geq1} g_j(B)+`g^*\abs{B}.
+%%\end{align*}
+%\begin{align*}
+%	0&=\min_{C\subseteq V:\abs{C}>1} \big[I^*(\RZ_V)-J_{\op{T}}(\RZ_C) \big]\\
+%	&=\min_{C\subseteq V:\abs{C}>1} \big[(\abs{C}-1) I^*(\RZ_V)+h(C)-\sum_{i\in C}h(\Set{i}) \big]  \\
+%	&=\min_{j\in V}\min_{B\subseteq U_j:\abs{B}\geq1} g_j(B)+I^*(\RZ_V)\abs{B}.
+%\end{align*}
+%In particular, the inner minimization can be cast as the minimization in \eqref{eq:S_`l} for the PS, and the solution via the minimum norm base in \eqref{eq:MNB:S_`l} gives \eqref{eq:maxJT:x} and \eqref{eq:argmaxJT:x}.
+%\end{Proof}
+
+
+
+So far we succeeded in posing the computation of the last critical value $I^{*}$ and
+last set of clusters $\pzC^{*}$ as a minimum norm base problem.
+However, our objective is to compute the entire clustering solution.
+To complete the implementation of \Agglomerate, we need the following theorem which reduces
+the computation of the clusters at any threshold to the computation of $I^*$ and $\pzC^*$ for some
+agglomerated RVs.
+%, we have the complete implementation of \Agglomerate as shown in Algorithm~\ref{algo:fuse} using a minimum norm base algorithm.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{Theorem}
+	\label{thm:`g:P:fused}
+ Consider  $\mcP_{\ell}$ and $`g_\ell$ as defined in Proposition~\ref{prop:clusters} and, for $1\leq
+ \ell\leq N$, write
+ \begin{align}
+ 	\mcP_{\ell}=\Set{C_j\mid j\in U} \kern1em \text{and}\kern1em
+ 	\RZ'_j:=\RZ_{C_j} \label {eq:Z'}
+ \end{align}
+ for some index set $U$ and disjoint subsets $C_j$ for $j\in U$. Then, for $1\leq \ell \leq N$, we
+ have
+ \begin{subequations}[eq:A:`g]
+ 	\begin{align}
+ 	`g_\ell
+	&=\max_{\mcF\subseteq \mcP_{\ell}:\abs{\mcF}>1} I(\RZ_{\bigcup \mcF}) \label{eq:A:`g_l}\\
+ 	&=I^*(\RZ'_U), %:=\max`1\{I(\RZ'_B)\mid B\subseteq U,\abs{B}>1`2\}
+ 	\label{eq:A:`g_l:fused}\\
+ 	\nextParentEquation[eq:A:P]
+ 	\kern-.7em\mcP_{\ell-1}`/\mcP_{\ell}
+ 	&=\op{maximal}\Set*{\bigcup\mcF`1| \mcF\in\kern-.5em \argmax_{\mcF\subseteq \mcP_{\ell}:\abs{\mcF}>1} \kern-.5em I(\RZ_{\bigcup \mcF}) \kern-.3em `2.}\kern-.5em\label{eq:A:P_i-1}\\
+ 	&=`1\{\bigcup\nolimits_{j\in B}C_j \mid B\in \pzC^*(\RZ'_U)`2\}, \label{eq:A:P_i-1:fused}
+ 	\end{align}
+ \end{subequations}
+where $\bigcup \mcF:=\bigcup_{B\in \mcF} B$ for convenience.
+%More precisely, \eqref{eq:A:`g_l} and~\eqref{eq:A:P_i-1} follow more generally from the property~\eqref{eq:imunion}, while \eqref{eq:A:`g_l:fused} and \eqref{eq:A:P_i-1:fused} follow from 
+%the definition~\eqref{eq:mmi} of the MMI.
+\end{Theorem}
+\begin{Proof}
+	See Appendix~\ref{sec:proof}.
+\end{Proof}
+%%\newcommand{\cb}{\bigcup_{i\in B}C_i}
+%%\newcommand{\cbb}{\bigcup\limits_{i\in B'}C_i}
+%\newcommand{\cb}{C_B}
+%\newcommand{\cbb}{C_{B'}}
+%\begin{Theorem}
+%	\label{thm:`g:P:fused}
+% Consider $\mcP_{\ell}$ and $`g_\ell$ defined as in Proposition~\ref{prop:clusters} for $1\leq \ell\leq N$ and write
+% \begin{align}
+% 	\mcP_{\ell}=\Set{C_j\mid j\in U} \kern1em \text{and}\kern1em
+% 	\RZ'_j:=\RZ_{C_j} \label {eq:Z'}
+% \end{align}
+% for some index set $U$ and disjoint subset $C_j$ for $j\in U$. Then, for $1\leq \ell \leq N$ we
+% have
+% \begin{subequations}[eq:A:`g]
+% 	\begin{align}
+%		`g_\ell&=\max_{B\subseteq U,\abs{B}>1} I(\RZ_{\cb}) \label{eq:A:`g_l}\\
+% 	&=I^*(\RZ'_U)%:=\max`1\{I(\RZ'_B)\mid B\subseteq U,\abs{B}>1`2\}
+% 	\label{eq:A:`g_l:fused}\\
+% 	\nextParentEquation[eq:A:P]
+% 	\kern-.7em\mcP_{\ell-1}`/\mcP_{\ell}
+%	&=\op{maximal}\Set*{C_{B}`1| B\in\kern-.5em \argmax_{B'\subseteq U:\abs{B'}>1} \kern-.5em I(\RZ_{\cbb}) \kern-.3em `2.}\kern-.5em\label{eq:A:P_i-1}\\
+%	&=`1\{\cb \mid B\in \pzC^*(\RZ'_U)`2\}, \label{eq:A:P_i-1:fused}
+% 	\end{align}
+% \end{subequations}
+%where $C_B:=\bigcup_{i\in B} C_i$ for convenience.
+%%More precisely, \eqref{eq:A:`g_l} and~\eqref{eq:A:P_i-1} follow more generally from the property~\eqref{eq:imunion}, while \eqref{eq:A:`g_l:fused} and \eqref{eq:A:P_i-1:fused} follow from 
+%%the definition~\eqref{eq:mmi} of the MMI.
+%\end{Theorem}
+
+%\begin{Proof}
+%	See Appendix~\ref{sec:proof}.
+%\end{Proof}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+%It follows from~\eqref{eq:A:`g_l:fused} and~\eqref{eq:A:P_i-1:fused} that it suffices to compute $I^*$~\eqref{eq:I*} and $\pzC^*$~\eqref{eq:C*}. This can be done using a minimum norm base algorithm as follows. Define
+%\begin{align}
+%\label{eq:JT}
+%\begin{split}
+%J_{\opT}(\RZ_V)&:=I_{\Set{\Set{i}\mid i\in V}}(\RZ_V)\\
+%&=\frac1 {\abs{V}-1}`1[\sum_{i \in V}H(\RZ_i)-H(\RZ_V)`2],
+%\end{split}
+%\end{align}
+%which is called the normalized total correlation~\cite{chan15mi} as it is the same as Watanabe's total correlation~\cite{watanabe60} except for the additional normalization factor of $\frac 1{\abs {V}-1}$.
+
+%\begin{Remark}
+
+%For efficient implementation, we can further impose $i$ in~\eqref{eq:I^*:f} to be the smallest element in $B\cup\Set{i}$ without loss of optimality, and so the minimization can be done over a smaller set of $B\subseteq \Set{j\in V\mid j> i}$. (See line~\ref{ln:MNB:1} of Algorithm~\ref{algo:fuse}.)
+%\end{Remark}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{example}
+	%As an illustration of Theorem~\ref{thm:`g:P:fused} (and the agglomerative algorithm), 
+	We now illustrate Theorems~\ref{thm:JT} and \ref{thm:`g:P:fused} using our running
+	example~\eqref{eq:eg-motivate}.
+
+	In the first iteration, $l=N$, consider \eqref{eq:Z'} with $\mcP_{\ell}$ being the partition into
+	singletons, namely, let $\RZ'_i=\RZ_i$ for $i=1, \dots, 6$ (i.e., $C_i=\Set {i}$).
+	By \eqref{eq:maxJT:x} and \eqref{eq:argmaxJT:x},
+	we have $I^{*}(\RZ_{\Set{1,\ldots,6}}) = 2$ and $\pzC^*(\RZ_{\Set{1,\dots,6}})=\Set {\Set {1,2}}$. (See Example~\ref{eg:IC*}.)
+	By \eqref{eq:A:`g_l:fused} and \eqref{eq:A:P_i-1:fused},
+	we have $`g_{N}=2$ and $\mcP_{N-1}`/\mcP_{N}=\Set{\Set{1,2}}$ as desired. 
+	In other words, when called with the
+	singletons partition
+	as the input partition, the function \Agglomerate returns the threshold value $`g_{N}$ and partition
+	$\mcP_{N-1}$ correctly.
+	
+	In the next iteration, $l=N-1$, consider \eqref{eq:Z'} with $\mcP_{\ell}$ as computed above,
+	namely, let $\RZ'_1 = \RZ_{\Set{1,2}}$ and $\RZ'_{i} = \RZ_{i+1}$ for
+	$i=2,\ldots,5$ (i.e., $C_1=\Set {1,2}$ and $C_i=\Set {i+1}$).
+	The minimum norm base $x_{U_{j}}^{(j)}$ of $g_{j}$ (defined using the entropy function of $\RZ'_{\Set{1,\dots,5}}$) is
+	\begin{align*}
+	x_{U_j}^{(j)} =\scalebox{0.8}{
+	\begin{blockarray}{lcc cl c}
+		\phantom{n}1 & 2 & 3 & 4 & 5 \\
+					\begin{block}{\{lcc cc c}
+							 (& \circled{-1}, & -0.5, & -0.5, & 0),   & j=1 \\
+							 (&     & -0.5, & -0.5, & 0),   & j=2 \\
+							 (&     &       & \circled{-1},   & 0),   & j=3 \\
+							 (&     &       &       & 0),   & j=4 \\
+					\end{block}
+	\end{blockarray}}
+	\end{align*}
+	By \eqref{eq:maxJT:x} and \eqref{eq:argmaxJT:x},
+	we have $I^{*}(\RZ'_{\Set{1,\ldots,5}}) = 1$ and 
+	$\pzC^{*}(\RZ'_{\Set{1,\ldots,5}}) = \Set{\Set{1,2},\Set{3,4}}$, which in terms of
+	$\RZ_{V}$, results in the clusters $\Set{\Set{1,2,3},\Set{4,5}}$.
+	By \eqref{eq:A:`g_l:fused} and \eqref{eq:A:P_i-1:fused},
+	we have $`g_{N-1}=1$ and $\mcP_{N-2}`/\mcP_{N-1}=\Set{\Set{1,2,3},\Set{4,5}}$ as desired. 
+	In other words, when called with the input partition $\Set{\Set{1,2},\Set{3},\Set{4},\Set{5},
+	\Set{6}}$, the function \Agglomerate returns the threshold value $`g_{N-1}$ and partition
+	$\mcP_{N-2}$ correctly.
+
+	In the next iteration, $l=N-2$, consider \eqref{eq:Z'} with $\mcP_{\ell}$ as computed above,
+	namely, let $\RZ'_1 = \RZ_{\Set{1,2,3}}$ ($C_1=\Set {1,2,3}$), $\RZ'_{2} = \RZ_{\Set{4,5}}$ ($C_2=\Set {4,5}$), and $\RZ'_{3} = \RZ_{6}$ ($C_3=\Set {6}$).
+	The minimum norm base $x_{U_{j}}^{(j)}$ of $g_{j}$ (defined using the entropy function of
+	$\RZ'_{\Set{1,2,3}}$) is given as
+	\begin{align*}
+		x_{U_j}^{(j)} =\scalebox{0.8}{
+		\begin{blockarray}{rc c c}
+			\phantom{n}1 & 2   & 3 \\
+						\begin{block}{\{l cc c}
+							(& \circled{0},   & \circled{0}),   & j=1 \\
+							(&     &               \circled{0}),   & j=2 \\
+						\end{block}
+		\end{blockarray}}
+		\end{align*}
+	By \eqref{eq:maxJT:x} and \eqref{eq:argmaxJT:x}, we have
+	$I^{*}(\RZ'_{\Set{1,2,3}}) = 0$ and $\pzC^{*}(\RZ'_{\Set{1,2,3}}) = \Set{1,2,3}$, which in terms of
+	$\RZ_{V}$, results in the trivial cluster $\Set{1,\dots,6}$.
+	By \eqref{eq:A:`g_l:fused} and \eqref{eq:A:P_i-1:fused},
+	$`g_{N-2}=0$ and $\mcP_{N-3} \backslash \mcP_{N-2} = \Set{1,\ldots,6}$ as desired.
+	%When called with the input partition 
+	%$\Set{\Set{1,2,3}, \Set{4,5}, \Set{6}}$, the function \Agglomerate will return the threshold value
+	%given by \eqref{eq:A:`g} and \eqref{eq:A:P} respectively.
+	At this point the agglomerative algorithm
+	terminates.
+\end{example}
+
+%\begin{Proof}[Sketch for Theorem~\ref{thm:`g:P:fused}]
+%	To prove \eqref{eq:A:`g_l}, we first argue that, for any feasible $\mcF$ to the r.h.s.\ of~\eqref{eq:A:`g_l}, 
+%	\begin{align*}
+%	I(\RZ_{\bigcup\mcF})\utag{i}\leq `g_\ell.
+%	\end{align*}
+%	Suppose to the contrary that $I(\RZ_{\bigcup\mcF})>`g_{\ell}$. Then, there exists
+%	$C\supseteq\bigcup \mcF$ such that $C\in \pzC_{`g_\ell}(\RZ_V)$ by 
+%	definition~\eqref{eq:clusters} of clusters.
+%	Hence, 
+%	$C \in \mcP_{\ell}$ since
+%	$\pzC_{`g_\ell}(\RZ_V)\subseteq \mcP_{\ell}$
+%	by Proposition~\ref{prop:clusters}, which contradicts the fact that $\mcF\subseteq \mcP_{\ell}$
+%	with $\abs {\mcF}>1$. 
+%%	However, $\pzC_{`g_\ell}(\RZ_V)\subseteq \mcP_{\ell}$
+%%	by Proposition~\ref{prop:clusters}, which contradicts the fact that $\mcF\subseteq \mcP_{\ell}$
+%%	with $\abs {\mcF}>1$. 
+%	
+%		Next, we show that \uref{i} can be achieved with equality for some feasible solution $\mcF$.
+%		Consider any $C\in \mcP_{\ell-1}`/\mcP_{\ell}$. (Such a $C$ exists since $\mcP_{\ell}$ is
+%		strictly finer than $\mcP_{\ell-1}$.) Then, we have 
+%	\begin{align*}
+%	C \utag{ii}= \bigcup \mcF\text{ for some }\mcF \subseteq \mcP_{\ell}:|\mcF| > 1,
+%	\end{align*}
+%	i.e., for some feasible solution $\mcF$.
+%	%By Proposition~\ref{prop:clusters}, we have 
+%	%$C\in \pzC_{`g}(\RZ_V)$ for all
+%	%$`g\in [`g_{\ell-1},`g_\ell)$,
+%	%and so $I(\RZ_C)\geq `g_\ell$. %, i.e., larger than all values in the interval.
+%	%The reverse inequality also holds by \uref{i} and \uref{ii}. Hence,
+%	%%\begin{align*}
+%	%$I(\RZ_C)=`g_\ell$,
+%	%%\end{align*}
+%	%which implies \eqref{eq:A:`g_l} as desired. 
+%	Proposition~\ref{prop:clusters} states that 
+%	$C\in \pzC_{`g}(\RZ_V)$ for all
+%	$`g\in [`g_{\ell-1},`g_\ell)$ since $C\in \mcP_{l-1}$,
+%		and so $I(\RZ_C)\geq `g_\ell$ by \eqref{eq:clusters}.
+%	The reverse inequality also holds by \uref{i} and \uref{ii}. Hence,
+%	%\begin{align*}
+%	$I(\RZ_C)=`g_\ell$,
+%	%\end{align*}
+%	which implies \eqref{eq:A:`g_l} as desired. 
+%
+%	\eqref{eq:A:P_i-1} can be proved by showing that the above construction gives all the optimal solutions to the r.h.s.\ of
+%	\eqref{eq:A:`g_l}.
+%	
+%%	Now, we argue that the above construction gives all the optimal solutions to the r.h.s.\ of
+%%	\eqref{eq:A:`g_l}, hence establishing \eqref{eq:A:P_i-1}. For any $C\in
+%%	\mcP_{\ell-1}`/\mcP_{\ell}$, \uref{ii} and \uref{iii} imply that ``$\subseteq$'' holds
+%%	for~\eqref{eq:A:P_i-1}, because the fact that $C\in \pzC_{`g_{\ell-1}}(\RZ_V)$ (by
+%%	Proposition~\ref{prop:clusters}) means that it is maximal by the definition~\eqref{eq:clusters}
+%%	of  clusters. 
+%%	
+%%	To argue the reverse inclusion ``$\supseteq$'', consider any $\mcF$ belonging to the r.h.s.\
+%%	of~\eqref{eq:A:P_i-1}. By \eqref{eq:A:`g_l}, 
+%%	%\begin{align*}
+%%	$I(\RZ_{\bigcup \mcF})=`g_\ell>`g_{\ell-1}$
+%%	%\end{align*}
+%%	and so $\bigcup \mcF\in \pzC_{`g_{\ell-1}}$ by the definition~\eqref{eq:clusters} of clusters and
+%%	the maximality of $\bigcup \mcF$. This completes the poof of~\eqref{eq:A:P_i-1}.
+%%	%To prove \eqref{eq:A:P_i-1}, 
+%	
+%	\eqref{eq:A:`g_l:fused} and \eqref{eq:A:P_i-1:fused} can be proved using the definitions of $I^*$
+%	and $\pzC^*$ in~\eqref{eq:IC*} and Proposition~\ref{prop:fund:cluster}.
+%\end{Proof}
+
+%\begin{Proof}[Sketch for Theorem~\ref{thm:`g:P:fused}]
+%	To prove \eqref{eq:A:`g_l}, we first argue that, for any feasible $\mcF$ to the r.h.s.\ of~\eqref{eq:A:`g_l}, 
+%	\begin{align*}
+%	I(\RZ_{\bigcup\mcF})\utag{i}\leq `g_\ell.
+%	\end{align*}
+%	Suppose to the contrary that $I(\RZ_{\bigcup\mcF})>`g_{\ell}$. Then, there exists
+%	$C\supseteq\bigcup \mcF$ such that $C\in \pzC_{`g_\ell}(\RZ_V)$ by the
+%	definition~\eqref{eq:clusters} of clusters. However, $\pzC_{`g_\ell}(\RZ_V)\subseteq \mcP_{\ell}$
+%	by Proposition~\ref{prop:clusters}, which contradicts the fact that $\mcF\subseteq \mcP_{\ell}$
+%	with $\abs {\mcF}>1$. 
+%	
+%		Next, we show that \uref{i} can be achieved with equality for some feasible solution $\mcF$.
+%		Consider any $C\in \mcP_{\ell-1}`/\mcP_{\ell}$. (Such a $C$ exists since $\mcP_{\ell}$ is
+%		strictly finer than $\mcP_{\ell-1}$.) Then, we have 
+%	\begin{align*}
+%	C \utag{ii}= \bigcup \mcF\text{ for some }\mcF \subseteq \mcP_{\ell}:|\mcF| > 1,
+%	\end{align*}
+%	i.e., for some feasible solution $\mcF$.
+%	
+%	By Proposition~\ref{prop:clusters}, we have 
+%	$C\in \pzC_{`g}(\RZ_V)$ for all
+%	$`g\in [`g_{\ell-1},`g_\ell)$,
+%	and so $I(\RZ_C)\geq `g_\ell$, i.e., larger than all values in the interval.
+%	The reverse inequality also holds by \uref{i} and \uref{ii}. Hence,
+%	\begin{align*}
+%	I(\RZ_C)\utag{iii}=`g_\ell,
+%	\end{align*}
+%	which implies \eqref{eq:A:`g_l} as desired. 
+%
+%%	\eqref{eq:A:P_i-1} can be proved by showing that the above construction gives all the optimal solutions to the r.h.s.\ of
+%%	\eqref{eq:A:`g_l}.
+%	
+%	Now, we argue that the above construction gives all the optimal solutions to the r.h.s.\ of
+%	\eqref{eq:A:`g_l}, hence establishing \eqref{eq:A:P_i-1}. For any $C\in
+%	\mcP_{\ell-1}`/\mcP_{\ell}$, \uref{ii} and \uref{iii} imply that ``$\subseteq$'' holds
+%	for~\eqref{eq:A:P_i-1}, because the fact that $C\in \pzC_{`g_{\ell-1}}(\RZ_V)$ (by
+%	Proposition~\ref{prop:clusters}) means that it is maximal by the definition~\eqref{eq:clusters}
+%	of  clusters. 
+%	
+%	To argue the reverse inclusion ``$\supseteq$'', consider any $\mcF$ belonging to the r.h.s.\
+%	of~\eqref{eq:A:P_i-1}. By \eqref{eq:A:`g_l}, 
+%	%\begin{align*}
+%	$I(\RZ_{\bigcup \mcF})=`g_\ell>`g_{\ell-1}$
+%	%\end{align*}
+%	and so $\bigcup \mcF\in \pzC_{`g_{\ell-1}}$ by the definition~\eqref{eq:clusters} of clusters and
+%	the maximality of $\bigcup \mcF$. This completes the poof of~\eqref{eq:A:P_i-1}.
+%	%To prove \eqref{eq:A:P_i-1}, 
+%	
+%	\eqref{eq:A:`g_l:fused} and \eqref{eq:A:P_i-1:fused} can be proved using the definition~\eqref{eq:IC*} of $I^*$ and $\pzC^*$ and Proposition~\ref{prop:fund:cluster}.
+%\end{Proof}
+

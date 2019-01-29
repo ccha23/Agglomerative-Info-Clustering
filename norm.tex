@@ -1,0 +1,109 @@
+\section{Principal sequence and minimum norm base}
+\label{sec:prelim}
+%\input{prelim}
+
+
+%The ability to compute the info-clustering solution efficiently stems from the submodularity of
+%entropy~\cite{fujishige78}, or equivalently the fact that conditional mutual information is
+%non-negative~\cite{shannon48}. More precisely,
+%the \emph{submodularity} of entropy means that the entropy function $h$ in \eqref{eq:h} satisfies
+%\begin{align}
+%	h(B_1)+h(B_2)\geq h(B_1\cup B_2)+h(B_1\cap B_2)  \label{eq:submodular}
+%\end{align}
+%for all $B_1,B_2\subseteq V$.
+%The entropy function is also said to be \emph{normalized} since $h(`0)=0$, and non-decreasing since $h(B')\leq h(B)$ whenever $B' \subseteq B \subseteq V$.
+%In combinatorial optimization~\cite{schrijver02}, submodularity is well-known to often give rise to polynomial-time solutions. 
+As discussed earlier, the PSP of $h$ is polynomial time solvable, which
+characterizes the info-clustering solution by Proposition~\ref{prop:clusters}.
+Our agglomerative algorithm
+will make use of yet another polynomial time solvable structure, discussed below,
+that is closely related to the PSP.
+% as explained in Section~\ref{sec:results}.
+%The details may be skipped for the first reading.
+
+
+Consider any submodular function $f:2^U\to `R$~\eqref{eq:submodular} on the finite ground set $U$. For $`l\in `R$, define
+\begin{align}
+\kern-.5em S_{`l}(f):=\max \argmin_{B\subseteq U} f(B)-`l\abs{B}, \label{eq:S_`l}
+\end{align}
+where $\max$ is the inclusion-wise maximum.
+Note that the minimization in \eqref{eq:S_`l} is a \emph{submodular function minimization (SFM)}
+since the function $B\subseteq U\mapsto f(B)-`l\abs{B}$ is also submodular. It is well-known that
+the minimizers of a submodular function form a lattice w.r.t. set inclusion~\cite{schrijver02}, and so the maximum
+in \eqref{eq:S_`l} exists and is unique.  
+\begin{Proposition}[\mbox{\cite{fujishige80,fujishige-pp-revisited}}] 
+	\label{prop:ps}
+	$S_{`l}(f)$ for $`l\in`R$ satisfies
+	 \begin{align*}
+		 \label{eq:aaa-ps}
+	 	S_{`l'}(f)\subseteq S_{`l''}(f) \kern1em \text {iff} \kern1em `l'\leq `l''.
+	 \end{align*}
+%	 %and is referred to as the principal sequence (PS).
+	 This defines a  sequence, for some positive integer $N'$, 
+	 \begin{align}
+		 \label{eq:aaa-pss}
+		 S_{\lambda_{0}} := \emptyset \subsetneq S_{\lambda_1} \subsetneq \dots \subsetneq S_{\lambda_{N'-1}} \subsetneq S_{\lambda_{N'}} := V
+	 \end{align}
+	 of distinct sets, which
+	 (together with the sequence $-\infty = \lambda_{0} < \lambda_1 < \dots < \lambda_{N'} <
+	 \lambda_{N'+1} := \infty$ of $\lambda$ values at which $S_{\lambda}$ changes)
+	 is referred to as the principal sequence (PS).
+%%	 The sequence 
+%%	 \begin{align*}
+%%		 S_{\lambda_{0}} := \emptyset \subsetneq S_{\lambda_1} \subsetneq \dots \subsetneq S_{\lambda_{N'-1}} \subsetneq S_{\lambda_{N'}} := V
+%%	 \end{align*}
+%%	 of distinct sets
+%%	 (together with the sequence $-\infty = \lambda_{0} < \lambda_1 < \dots < \lambda_{N'} < \lambda_{N'+1} := \infty$)
+%%	 is referred to as the principal sequence (PS).
+\end{Proposition}
+%$S_{`l}(f)$ can be characterized and computed in strongly polynomial time as follows:
+%	Equation \eqref{eq:aaa-ps} defines a  sequence, for some positive integer $N'$, 
+%	 \begin{align*}
+%		 S_{\lambda_{0}} := \emptyset \subsetneq S_{\lambda_1} \subsetneq \dots \subsetneq S_{\lambda_{N'-1}} \subsetneq S_{\lambda_{N'}} := V
+%	 \end{align*}
+%	 of distinct sets. This sequence
+%	 (together with the sequence $-\infty = \lambda_{0} < \lambda_1 < \dots < \lambda_{N'} <
+%	 \lambda_{N'+1} := \infty$ of $\lambda$ values at which $S_{\lambda}$ changes)
+%	 is referred to as the principal sequence (PS).
+
+W.l.o.g., we assume $f$ is normalized, i.e., $f(`0)=0$, since we can redefine
+$f$ as $f-f(`0)$ without  affecting the solutions to the SFM in~\eqref{eq:S_`l}, i.e., aside from a
+shift in the $\lambda_i$ values, the
+PS~\eqref{eq:aaa-pss} is
+invariant to a constant shift in the submodular function. The polyhedron $\rmP(f)$ and base polyhedron
+$\rmB(f)$ of the submodular function $f$ are defined as
+\begin{subequations}
+	\label{eq:PB}
+\begin{align}
+	\rmP(f)&:=\Set {x_U\in `R^U\mid x(B)\leq f(B),\forall B\subseteq U} \label{eq:rmP}\\
+	\rmB(f)&:=\Set {x_U\in \rmP(f)\mid x(U)=f(U)}, \label{eq:rmB}
+\end{align}
+\end{subequations}
+where $x_U:=(x_i\mid i\in U)$ and $x(B):=\sum_{i\in B} x_i$. (N.b., $\rmP(f)$ and
+$\rmB(f)$ are non-empty since $f(`0)\geq 0$.) With $\norm {x_U}$ denoting the Euclidean norm of the
+vector $x_U$, the following holds.
+
+\begin{Proposition}[\mbox{\cite{fujishige80,fujishige11}}]
+	\label{prop:MNB}
+	For any normalized submodular function $f$~\eqref{eq:submodular},
+	the minimization
+	\begin{align}
+		\label{eq:MNB}
+		\min \Set{\norm{x_U}\mid x_U\in \rmB(f)}
+		%\min_{x_{U}\in \mathbb{R}^{U} } \Set{\norm{x_U} \mid x_U \in \mathbb{R}^{U},  x(B)\leq f(B) \ \forall B\subseteq U, x(U) = f(U)}
+	\end{align}
+	has a unique solution $x_U^*$, called the minimum (Euclidean) norm base, which satisfies
+	\begin{subequations}
+	\begin{alignat}{2}
+		\kern-1em x^*_i&=\min\Set{`l\in`R\mid i\in  S_{`l}(f)}&\kern1em& \forall i\in U, \text {or equiv.,}\label{eq:MNB:x*}\kern-.5em\\
+		\kern-1em S_{`l}(f)&=\Set{i\in U\mid x^*_i\leq `l},&\kern1em & \forall `l\in `R,\label{eq:MNB:S_`l}
+	\end{alignat}
+	\end{subequations}
+	where the equivalence follows directly from Proposition~\ref{prop:ps}.
+\end{Proposition}
+
+The minimum norm base, and so the PS by \eqref{eq:MNB:S_`l}, may be computed using Wolfe's minimum norm point algorithm as
+in~\cite{fujishige11}. Conversely, by \eqref{eq:MNB:x*},
+the minimum norm base can also be computed by any SFM algorithm that solves $S_{`l}$ for any $`l$.
+However, the minimum norm point algorithm was shown~\cite{fujishige11} empirically to outperform other SFM algorithms. 
+

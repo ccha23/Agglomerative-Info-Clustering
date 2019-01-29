@@ -1,0 +1,31 @@
+			\begin{tikzpicture}[
+			group/.style={fill opacity=.2, inner sep=0, outer sep=0, rounded corners},
+			every node/.style={rounded corners, text opacity=1}
+			]
+			
+			
+			\matrix(p0)at(2,-2)[matrix of math nodes, ampersand replacement=\&,
+			row sep=1mm,
+			column sep=.8mm,
+			every cell/.style={anchor=base west}]{
+				1 \& 2\& 3 \\
+				\\};
+			\def\dist{1.8}
+			\def\distx{.3cm}
+			\def\disty{.1cm}
+			\matrix(p1)[below = \disty of p0,
+			matrix of math nodes, ampersand replacement=\&,
+			row sep=1mm,
+			column sep=.8mm,
+			every cell/.style={anchor=base west}]{
+				1 \& 2\& 3 \\
+				\\};
+			
+			% clustering of Z in PLP
+			\node[dashed, draw, group, fill=none, fit=(p0-1-1)(p0-1-3)]{};
+			%			%
+			\node[draw, \thickness, group, fill=none, fit=(p1-1-1)(p1-1-2)]{};
+			\node[draw, group, fill=none, fit=(p1-1-3)]{};
+			%			%
+			\draw(p0-1-2)--(p1-1-2);
+			\end{tikzpicture}

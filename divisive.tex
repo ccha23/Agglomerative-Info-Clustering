@@ -1,0 +1,97 @@
+\section{Divisive approach}
+With the laminar structure in Proposition~\ref{prop:clusters}, a divisive algorithm was given in \cite{chan16cluster} to
+compute $`g_\ell$ and $\mcP_{\ell}$ by iteratively producing finer partitions from coarser ones,
+%i.e., from $\ell=1$ to $N$. 
+i.e., from $\mcP_1$ to $\mcP_N$. 
+The following result is instrumental in the devising of such an algorithm.
+%
+\begin{Proposition}[\mbox{\cite[Theorems~5.2 \& 5.3]{chan15mi}, \cite[Theorem~4]{chan16cluster}}]
+	\label{prop:fund:cluster}
+	The optimal partitions achieving the MMI in~\eqref{eq:mmi} together with the trivial partition $\{V\}$ form a
+	lattice w.r.t.\ \eqref{eq:finer}. The minimum/finest optimal partition, denoted 
+	$\mcP^{*}(\RZ_V)$, satisfies 
+	\begin{align*}
+		\mcP^{*}(\RZ_V) \backslash \{\{i\}\mid i\in V\} = \pzC_{I(\RZ_V)}(\RZ_V),
+	\end{align*}
+	with $\pzC_{`g}$ defined in \eqref{eq:clusters}.
+	In other words,  $`g_1 = I(\RZ_V)$ and $\mcP_{1} = \mcP^{*}(\RZ_V)$ in
+	Proposition~\ref{prop:clusters}. Finally, for $\ell \geq 1$,
+	%if there exists $C \in \mcP_{\ell}:\abs {C}>1$,
+	%if $\mcP_{\ell}$ is not the singletons partition,
+	if $\mcP_l$ is not the partition into singletons,
+	then $`g_{\ell +1} = \min\nolimits_{C\in \mcP_{\ell}:\abs{C}> 1}I(\RZ_C)$ and
+	$\mcP_{\ell+1}\supseteq \mcP^*(\RZ_C)$ for any minimizer $C$.
+\end{Proposition}
+%Together with the laminar structure in Proposition~\ref{prop:clusters}, it can be argued that 
+Because of the last statement in the proposition, any algorithm for computing $\mcP^{*}(\RZ_V)$ can
+be applied iteratively for the divisive info-clustering approach as in~\cite[Algorithm~2]{chan16cluster}.
+However,
+as discussed in Section~\ref{sec:complexity},
+this divisive approach can be a factor $n$ slower than \cite[Algorithm~3]{chan16cluster}.
+
+\begin{example}
+	\label{eg:divisive}
+	As an illustration of Proposition~\ref{prop:fund:cluster} and the divisive approach, consider
+	$\RZ_{\{1,\dots,6\}}$ in \eqref{eq:eg-motivate}.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	The finest optimal partition
+	$\mcP^{*}(\RZ_V) = \Set{\Set{1,2,3},\Set{4,5},\Set{6}}$ is shown in \figref{fig:eg-div-zv}, and
+	so one can easily verify from \eqref{eq:I} that $I(\RZ_{V}) = 0$.
+	For completion, the figure also shows the lattice of optimal partitions stated in the proposition,
+	where the trivial partition $\Set{V}$ is indicated using a dashed line.
+	Similarly, \figref{fig:eg-div-z123} shows the optimal partitions of
+	$\RZ_{\Set{1,2,3}}$.
+	Since $I(\RZ_{V}) = 0$, Proposition~\ref{prop:fund:cluster}
+	asserts that $\pzC_{0}(\RZ_V) = \Set{\Set{1,2,3},\Set{4,5}}$.
+	Since $I(\RZ_{\Set{1,2,3}}) =I(\RZ_{\Set{4,5}})=1$ (and $\Set{1,2,3}$
+	is the only cluster
+	%among the two whose finest optimal partition is not the partition into singletons),
+	%whose finest optimal partition contains a non-singleton),
+	with a non-singleton in its finest optimal partition),
+	Proposition~\ref{prop:fund:cluster} asserts that
+	$\pzC_{1}(\RZ_V)=\pzC_1(\RZ_{\Set {1,2,3}}) = \Set{\Set{1,2}}$. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%	Assuming an algorithm for computing the
+%	finest optimal partition, the divisive algorithm starts by computing 
+%	$\mcP^{*}(\RZ_V) = \Set{\Set{1,2,3},\Set{4,5},\Set{6}}$ (from which $I(\RZ_V)$ is readily
+%	available), declares the non-singleton elements as clusters at threshold $I(\RZ_V)$,
+%	and proceeds iteratively by picking any cluster (of size larger than two) and computing its
+%	finest optimal partition, etc. In our example, there are two clusters, the sets $\Set{1,2,3}$ and $\Set{4,5}$
+%	at threshold $0$.
+%%	The finest optimal partition of $\RZ_{\Set{1,2,3}}$ is shown in
+%%	Fig.~\ref{fig:eg-div-z123}, which results in the cluster $\Set{1,2}$ at threshold
+%%	$I(\RZ_{\Set{1,2,3}}) = 1$.
+%%	Also, $I(\RZ_{\Set{4,5}}) = 1$ with $\mcP^{*}(\RZ_{\Set{4,5}}) = \Set{\Set{4},\Set{5}}$.
+%	%
+%	At threshold $I(\RZ_{\Set{1,2,3}}) = 1$, $\Set{1,2,3}$ results in the cluster $\Set{1,2}$ since this is only nonsinglton element of $\mcP^{*}(\RZ_{\Set{1,2,3}})$ as shown in Fig.~\ref{fig:eg-div-z123}.
+%	At threshold $I(\RZ_{\Set{4,5}}) = 1$, $\Set{4,5}$ gives no clusters since $\mcP^{*}(\RZ_{\Set{4,5}}) = \Set{\Set{4},\Set{5}}$.
+%	At threshold $I(\RZ_{\Set{1,2}}) = 2$, $\Set{1,2}$ gives no clusters since $\mcP^{*}(\RZ_{\Set{1,2}}) = \Set{\Set{1},\Set{2}}$.
+%	After this, the algorithm terminates with the entire hierarchy of clusters as in \eqref{eq:eg-clusters}.
+%	%
+	Assuming an algorithm for computing the
+	finest optimal partition, the divisive algorithm starts by computing 
+	$\mcP^{*}(\RZ_V) = \Set{\Set{1,2,3},\Set{4,5},\Set{6}}$ (from which $I(\RZ_V)$ is readily
+	available), declares the non-singleton elements as clusters at threshold $I(\RZ_V)$,
+	and proceeds iteratively by picking any cluster (of size larger than two) and computing its
+	finest optimal partition, etc.
+	In our example, $\mcP^{*}(\RZ_V)$ is shown in Fig.~\ref{fig:eg-div-zv}, which results in the clusters $\Set{\Set{1,2,3}, \Set{4,5}}$ at threshold $I(\RZ_{V}) = 0$.
+	Next, $\mcP^{*}(\RZ_{\Set{1,2,3}})$ is shown in Fig.~\ref{fig:eg-div-z123}, which results in the cluster $\Set{1,2}$ at threshold $I(\RZ_{\Set{1,2,3}}) = 1$.
+	%$\mcP^{*}(\RZ_{\Set{4,5}}) = \Set{\Set{4},\Set{5}}$, which procudces no clusters at threshold $I(\RZ_{\Set{4,5}}) = 1$.
+	%$\mcP^{*}(\RZ_{\Set{1,2}}) = \Set{\Set{1},\Set{2}}$, which prodices no clusters at threshold $I(\RZ_{\Set{1,2}}) = 2$.
+	After this, the divisive algorithm terminates with the entire hierarchy of clusters as in \eqref{eq:eg-clusters}.
+	(In this example, the algorithm did not compute the last threshold in \eqref{eq:eg-clusters}, but it can do
+	so by letting it proceed to clusters of size two.)
+\end{example}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%The divisive approach can be a factor $n$ slower than \cite[Algorithm~3]{chan16cluster} as discussed in Section~\ref{sec:complextiy}.
+%The divisive approach can be a factor $n$ slower than \cite[Algorithm~3]{chan16cluster} that
+%computes (in no particular order) all the clusters. %Nevertheless, in practice it is desirable to have 
+%Nevertheless, an iterative approach of computing the clusters in order remains desirable
+%in practice as it can stop when further computations are not of
+%interest or are meaningless due to errors in estimating the entropies from data.
+%Agglomerative info-clustering will achieve this appealing iterative computation (according to order)
+%while retaining the same run-time complexity as \cite[Algorithm~3]{chan16cluster}. 
+
+

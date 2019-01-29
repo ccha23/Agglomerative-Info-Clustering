@@ -1,0 +1,51 @@
+\section{Introduction}
+\label{sec:introduction}
+
+
+Info-clustering was proposed in \cite{chan16cluster} as a hierarchical
+clustering of random variables (RVs) based on their multivariate mutual information (MMI)~\cite{chan15mi}.
+The hierarchy of clusters is unique and was characterized in~\cite{chan16cluster} as the principal 
+sequence of partitions (PSP)~\cite{narayanan90} of the entropy function of the RVs.  This leads to a
+polynomial-time algorithm~\cite[Algorithm~3]{chan16cluster} that computes the clustering solution in
+$O(n^2 \op{SFM}(n))$ time, where $n$ is the number of RVs and $\op {SFM}(n)$ is the time required to
+minimize a submodular function on a ground set of size $n$. In practice:
+\begin{inparaenum}
+	\item One may want to obtain clusters of a desired size rather than the entire hierarchy of clusters
+	of different sizes. 
+	\item The entropy function needs to be estimated from data, which can be
+	difficult for a large set of random variables~\cite{wu16}. 
+\end{inparaenum}
+These practical considerations (or issues) motivate the following question. Can we construct an info-clustering
+algorithm that
+\begin{inparaenum}
+\item[a)] has the same complexity $O(n^2 \op{SFM}(n))$ as above, and
+\item[b)] computes the clusters iteratively according to their sizes? (Due to the 2nd practical
+		consideration, i.e., to reduce the chances of propagating errors arising from unreliable
+		entropy estimations,  it is preferable that the algorithm starts with smaller clusters and proceeds to larger ones.)
+\end{inparaenum}
+
+A divisive
+clustering approach was proposed in~\cite[Algorithms~1 \& 2]{chan16cluster} that breaks down the
+%computation by successively dividing the entire set of RVs into increasingly smaller clusters.
+computation by subdividing the entire set of RVs successively into increasingly smaller clusters.
+%However, this slows down the computation of the clustering solution by an order of $n$,
+However, this slows down the clustering-solution computation by an order of $n$ (compared to \cite[Algorithm~3]{chan16cluster}),
+%and does not address the second practical consideration.
+and may also suffer significant error propagations due to the 2nd practical consideration.
+
+The contribution of this work is an affirmative answer to the above question. 
+Namely, we provide an agglomerative algorithm, with the desired complexity, that computes the 
+clusters by grouping the RVs into increasingly larger clusters.
+The idea is inspired by the duality between the PSP and a related structure called the
+principal sequence (PS)~\cite{fujishige80,fujishige05,fujishige-pp-revisited}. We clarify these
+mathematical structures, which leads to a fundamental property connecting the MMI and the well-known
+Watanabe's total correlation. This result is of interest in its own and can be viewed as a second
+contibution of this work. 
+
+We remark that this work focusses on info-clustering. The clustering problem is a prominent
+one in machine learning with vast literature and several clustering techniques. For a brief survey
+on the subject (that compares info-clustering to other clustering methods) we refer the interested
+reader to \cite{chan16cluster} and the references therein.
+%Finally, due to space limitations, we only sketch the proofs here and rely on examples as a more efficient
+%%, under space limitations,
+%way for demonstrating some of the results. Full proofs can be found in~\cite{chan17aic}.
