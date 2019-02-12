@@ -1,0 +1,5 @@
+channels:
+  - conda-forge
+dependencies:
+  - xeus-cling=0.4.11
+  - notebook
