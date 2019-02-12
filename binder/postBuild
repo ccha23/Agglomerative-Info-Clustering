@@ -1,0 +1,5 @@
+#!/bin/bash
+
+jupyter labextension install @jupyterlab/latex
+pdflatex main
+cd ~/include/; make

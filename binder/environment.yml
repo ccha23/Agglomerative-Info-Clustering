@@ -3,3 +3,6 @@ channels:
 dependencies:
   - xeus-cling=0.4.11
   - notebook
+  - jupyterlab>=0.33
+  - pip:
+    - jupyterlab_latex

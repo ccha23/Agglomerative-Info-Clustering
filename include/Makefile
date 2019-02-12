@@ -1,8 +1,6 @@
 CXX=g++ 
 RM=rm -f
-CPPFLAGS=-g -std=c++11
-LDFLAGS=-g
-LDLIBS=
+CPPFLAGS=-g -std=c++11 -I.
 
 SRCS=AIC.cpp SF.cpp PSP.cpp main.cpp
 OBJS=$(subst .cc,.o,$(SRCS))
@@ -10,7 +8,10 @@ OBJS=$(subst .cc,.o,$(SRCS))
 all: main
 
 main: $(OBJS)
-	$(CXX) $(CPPFLAGS) $(LDFLAGS) -o main.out $(OBJS) $(LDLIBS) 
+	$(CXX) $(CPPFLAGS) -o main.out $(OBJS) 
+
+%.o: %.cpp
+	$(CXX) $(CPPFLAGS) -c $<
 
 clean:
 	$(RM) $(OBJS)
