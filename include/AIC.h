@@ -148,7 +148,7 @@ class AIC : public HC {
 			size_t m = B.size();
 			vector<size_t> B_(m + 1);
 			for (size_t i = 0; i < m; i++) {
-				if (B[i] < j && B[i] >= 0) {
+				if (B[i] < j) {
 					B_[i] = B[i];
 				}
 			}
