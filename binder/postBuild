@@ -1,5 +1,5 @@
 #!/bin/bash
 
 jupyter labextension install @jupyterlab/latex
-#pdflatex main
-#cd ~/include/; make
+pdflatex main; bibtex main; pdflatex main; pdflatex main; mv main.pdf doc/
+cd ~/include/; g++ -g -std=c++11 -I. -o demo.out demo.cpp
