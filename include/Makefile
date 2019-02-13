@@ -1,18 +1,15 @@
 CXX=g++ 
-RM=rm -f
+RM=rm -rf
 CPPFLAGS=-g -std=c++11 -I.
 
-SRCS=AIC.cpp SF.cpp PSP.cpp main.cpp
+SRCS=
 OBJS=$(subst .cc,.o,$(SRCS))
 
-all: main
+all: demo
 
-main: $(OBJS)
-	$(CXX) $(CPPFLAGS) -o main.out $(OBJS) 
-
-%.o: %.cpp
-	$(CXX) $(CPPFLAGS) -c $<
+demo: $(OBJS)
+	$(CXX) $(CPPFLAGS) -o demo.out $(OBJS) 
 
 clean:
-	$(RM) $(OBJS)
+	$(RM) $(OBJS) *.dSYM
 
