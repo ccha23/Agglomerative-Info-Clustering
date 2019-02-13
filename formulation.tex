@@ -1,4 +1,4 @@
-\section{Problem formulation}
+\section{Preliminaries and Problem formulation}
 \label{sec:problem}
 Consider a random vector $\RZ_V:=(\RZ_i \mid i \in V)$ where $V:=\Set {1,\dots,n}$ is a set of $n>1$
 RVs. Let $\Pi(V)$ be the set of partitions of $V$ into non-empty disjoint sets and
@@ -9,7 +9,7 @@ For $\mcP, \mcP' \in \Pi(V)$, we say $\mcP$ is finer than $\mcP'$, denoted $\mcP
 	\label{eq:finer}
 	\forall C \in \mcP,  \exists  C' \in \mcP' : C \subseteq C',
 \end{align}
-and use ``$\prec$" to denote the strict inequality, i.e., the inclusion above is strict for at least
+and use ``$\prec$" to denote the strict inequality, i.e., when the inclusion above is strict for at least
 one $C \in \mcP$.
 %%%%%%%%%%%%%%
 %The multivariate mutual information (MMI) is characterized in~\cite{chan15mi} as the
@@ -123,7 +123,7 @@ Consequently, the clustering solution can be characterized by a sequence of part
 \end{Proposition}
 
 \begin{remark}
-	This proposition follows from the following property of the MMI
+	The proposition above follows from the following property of the MMI
 	\begin{align}
 		\label{eq:imunion}
 		I(\RZ_{B_{1} \cup B_{2}}) \geq \min\{I(\RZ_{B_1}), I(\RZ_{B_2})\}
@@ -135,7 +135,8 @@ Consequently, the clustering solution can be characterized by a sequence of part
 	However, for definiteness, we restrict attention to the MMI \eqref{eq:mmi} in this work.
 	In this case, the sequence of partitions in the proposition coincides with the principal sequence
 	of partitions (PSP) of the
-	Dilworth truncation of the entropy function, as briefly discussed below. 
+% 	Dilworth truncation of the
+	entropy function, as briefly discussed below. 
 \end{remark}
 
 The sequence of partitions in Proposition~\ref{prop:clusters} (together with the critical values) was further shown in
