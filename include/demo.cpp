@@ -8,6 +8,7 @@
 
 using namespace std;
 using namespace Eigen;
+using namespace IC;
 
 int main() {
 	size_t k = 5;
