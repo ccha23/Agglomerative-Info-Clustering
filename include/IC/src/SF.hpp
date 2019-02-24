@@ -7,9 +7,11 @@
 #include <iostream>
 #include <vector>
 #include <Eigen/Dense>
+#include <opencv2/opencv.hpp>
 
 using namespace std;
 using namespace Eigen;
+using namespace cv;
 
 namespace IC { 
 
@@ -28,6 +30,183 @@ namespace IC {
 		@return The size of the ground set.
 		*/
 		virtual size_t size() const=0;
+	};
+
+	class CartEntropy : public SF {
+	private:
+		const char * csv_path;
+		MatrixXd Genes; // genes matrix rows are condition, columns are genes
+	public:
+		CartEntropy(const char *csv_file_name) {
+			// Michael Lim
+			// Hard code now
+			// initialize the Genes Matrix from the file csv_file_name
+			csv_path = csv_file_name;
+		}
+
+		Ptr<ml::TrainData> get_dataset(const vector<size_t> &X, const size_t y) const{ 
+			// Michael Lim
+
+			// hardcode now
+			// Genes
+			//Read in the data file
+			// Ptr<ml::TrainData> data_set =
+			// 	cv::ml::TrainData::loadFromCSV(csv_path, // Input file name
+			// 	200, // Header lines (ignore this many)
+			// 	120, // Responses are (start) at thie column
+			// 	121, // Inputs start at this column
+			// 	"ord[0-121]" // All 122 columns are ordered
+			// 	);
+			Ptr<ml::TrainData> data_set =
+				cv::ml::TrainData::loadFromCSV(csv_path, // Input file name
+				0, // Header lines (ignore this many)
+				-1, // Responses are (start) at thie column
+				-1, // Responses are (end) at this column
+				"ord[0-3]" // All 122 columns are ordered
+				);
+			return data_set;
+		}
+
+		double mse (const Ptr<ml::TrainData> dataset) const {
+			// Thomas
+			// train the cart algorithm and return the mse loss
+
+			int n_samples = dataset->getNSamples();
+			if (n_samples == 0) {
+				cerr << "No data";
+				exit(-1);
+			}
+			// else {
+			// 	cout << "Read " << n_samples << " samples" << endl;
+			// }
+
+			// Split the data, so that 90% is train data
+			//
+			dataset->setTrainTestSplitRatio(0.90, false);
+			int n_train_samples = dataset->getNTrainSamples();
+			int n_test_samples = dataset->getNTestSamples();
+			// cout << "Found " << n_train_samples << " Train Samples, and "
+			// 	<< n_test_samples << " Test Samples" << endl;
+
+			// Create a DTrees classifier.
+			//
+			cv::Ptr<cv::ml::RTrees> dtree = cv::ml::RTrees::create();
+			
+			// set parameters
+			float _priors[] = { 1.0, 10.0 };
+			cv::Mat priors(1, 2, CV_32F, _priors);
+			dtree->setMaxDepth(8);
+			dtree->setMinSampleCount(10);
+			dtree->setRegressionAccuracy(0.01f);
+			dtree->setUseSurrogates(false /* true */);
+			dtree->setMaxCategories(15);
+			dtree->setCVFolds(0 /*10*/); // nonzero causes core dump
+			dtree->setUse1SERule(true);
+			dtree->setTruncatePrunedTree(true);
+			dtree->setPriors( priors );
+			dtree->setPriors(cv::Mat()); // ignore priors for now...
+			
+			// Now train the model
+			// NB: we are only using the "train" part of the data set
+			//
+			dtree->train(dataset);
+
+			// Having successfully trained the data, we should be able
+			// to calculate the error on both the training data, as well
+			// as the test data that we held out.
+			//
+			cv::Mat results;
+			float train_performance = dtree->calcError(dataset,
+				false, // use train data
+				results // cv::noArray()
+			);
+			return train_performance;
+		}
+
+		/*
+		Calculate the entropy of a gaussian subvector.
+		@param B subvector of elements from the ground set.
+		@return Entropy of the gaussian subvector indexed by elements in B.
+		*/
+		double operator() (const vector<size_t> &B) const {
+			// Handason
+			size_t n = B.size();
+			vector<size_t> B_ = B;
+			sort(B_.begin(), B_.end());
+			double h = 0;
+			// H(z1, z2, z3) = H(z1) + H(z2|z1) + H(z3|x1, x2)
+			for (size_t i = 0; i < n; i++){
+				if (i == 0){
+					h += 0;  // variance
+				} else {
+					// H(z1|z0), H(z2|x0, x1), ...
+					// X = [0], y = 1, ..., X = [0, 1], y = 2, ...
+					vector<size_t> X(i);
+					for (size_t j = 0; j < i; j++){
+						X[j] = B_[j];
+					}
+					Ptr<ml::TrainData> temp_dataset = get_dataset(X, i);
+					h += mse(temp_dataset);
+				}
+			}
+			
+			cout << "for B = {";
+			for (auto i: B)
+ 				cout << i << ' ';
+			cout << "}" << endl;
+
+			cout << "mse error: " << h << "\n" << endl;
+			// return 1;
+			return h;
+		}
+
+		size_t size() const {
+			// return Genes.cols();
+			// hard code currently
+			return 4;
+		}
+	};
+
+	class HardCodeEntropy : public SF {
+	// private:
+	public:
+		HardCodeEntropy(int x){
+
+		}
+	
+		double operator() (const vector<size_t> &B) const {
+			size_t n = B.size();
+			vector<size_t> B_ = B;
+			sort(B_.begin(), B_.end());
+			std::vector<size_t> v1 = { 0 };
+			std::vector<size_t> v2 = { 1 };
+			std::vector<size_t> v3 = { 2 };
+			std::vector<size_t> v4 = { 0, 1 };
+			std::vector<size_t> v5 = { 0, 2 };
+			std::vector<size_t> v6 = { 1, 2 };
+			std::vector<size_t> v7 = { 0, 1, 2 };
+			if ((B_ == v1) || (B_ == v2) || (B_ == v3)) {
+				return 0;
+				// return 1;
+			} else if (B_ == v4) {
+				return 1;
+				// return 1.3;
+			} else if (B_ == v5) {
+				return 1;
+				// return 1.7;
+			} else if (B_ == v6) {
+				return 1;
+				// return 1.7;
+			} else if (B_ == v7) {
+				return 2;
+				// return 2.1;
+			}
+			return 2.1;
+		}
+
+		size_t size() const {
+			return 3;
+		}
 	};
 
 	class GaussianEntropy : public SF {
