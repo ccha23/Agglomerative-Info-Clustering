@@ -338,9 +338,14 @@ namespace IC {
 		@param eps Precision
 		*/
 		bool agglomerate(double fn_tol, double eps) {
-			double gamma = -1;
+			double gamma = -100000;
 			vector<vector<size_t>> P=this->getPartition(gamma);
-			if (P.size() <= 1) return false;
+			// cout << "gamma:" << gamma << endl;
+			// cout << P << endl;
+			if (P.size() <= 1) {
+				cout << P << endl;
+				return false;
+			}
 			SF_ f_(f,P);
 			size_t n = P.size();
 			//cout << "P : " << P << endl;
@@ -355,9 +360,11 @@ namespace IC {
 			//cout << "gamma : " << gamma << endl;
 			for (size_t j = 1; j < n; j++) {
 				for (size_t i = 0; i < j; i++) {
-					//cout << x[j - 1](i) << endl;
+					// cout << x[j - 1](i) << endl;
+					// cout << -gamma + fn_tol << endl;
+					// cout << gamma << endl;
 					if (x[j - 1](i) <= -gamma + fn_tol) // instead of eps, = is required to handle -INFINITY
-						//cout << "fusing " << P[j][0] << " " << P[i][0] << endl;
+						// cout << "fusing " << P[j][0] << " " << P[i][0] << endl;
 						merge(P[j][0], P[i][0], gamma);
 				}
 			}

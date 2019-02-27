@@ -183,7 +183,7 @@ namespace IC {
 					for (size_t j = 0; j < i; j++){
 						X[j] = B_[j];
 					}
-					Ptr<ml::TrainData> temp_dataset = get_dataset(X, i);
+					Ptr<ml::TrainData> temp_dataset = get_dataset(X, B[i]);
 					h += mse(temp_dataset);
 				}
 			}
@@ -210,7 +210,6 @@ namespace IC {
 		HardCodeEntropy(int x){
 
 		}
-	
 		double operator() (const vector<size_t> &B) const {
 			size_t n = B.size();
 			vector<size_t> B_ = B;
