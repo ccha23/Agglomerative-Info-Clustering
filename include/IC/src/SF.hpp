@@ -200,8 +200,7 @@ namespace IC {
 
 		size_t size() const {
 			// return Genes.cols();
-			// hard code currently
-			return 4;
+			return Genes[0].size();
 		}
 	};
 
