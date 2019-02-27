@@ -34,37 +34,73 @@ namespace IC {
 
 	class CartEntropy : public SF {
 	private:
-		const char * csv_path;
-		MatrixXd Genes; // genes matrix rows are condition, columns are genes
+		vector<vector<double>> Genes; // genes matrix rows are condition, columns are genes
 	public:
-		CartEntropy(const char *csv_file_name) {
-			// Michael Lim
-			// Hard code now
-			// initialize the Genes Matrix from the file csv_file_name
-			csv_path = csv_file_name;
+		CartEntropy(vector<vector<double>> G) {
+			Genes = G;
 		}
 
 		Ptr<ml::TrainData> get_dataset(const vector<size_t> &X, const size_t y) const{ 
-			// Michael Lim
+			vector<vector<double>> genes;
+			for (auto& row : Genes) {               /* iterate over rows */
+				vector<double> temp;
+				for (auto &k : X)  {
+					temp.push_back(row[k]);
+				}
+				genes.push_back(temp);
+			}
+			
 
-			// hardcode now
-			// Genes
-			//Read in the data file
-			// Ptr<ml::TrainData> data_set =
-			// 	cv::ml::TrainData::loadFromCSV(csv_path, // Input file name
-			// 	200, // Header lines (ignore this many)
-			// 	120, // Responses are (start) at thie column
-			// 	121, // Inputs start at this column
-			// 	"ord[0-121]" // All 122 columns are ordered
-			// 	);
+			vector<vector<double>> target;
+			for (auto& row : Genes) {               /* iterate over rows */
+				vector<double> temp{ row[y] }; 
+				target.push_back(temp);
+			}
+
+			cv::Mat labels = toMat(target);
+			cv::Mat mat = toMat(genes);
+
+			// cout << mat << endl;
+			// cout << labels << endl;
 			Ptr<ml::TrainData> data_set =
-				cv::ml::TrainData::loadFromCSV(csv_path, // Input file name
-				0, // Header lines (ignore this many)
-				-1, // Responses are (start) at thie column
-				-1, // Responses are (end) at this column
-				"ord[0-3]" // All 122 columns are ordered
+				cv::ml::TrainData::create(mat, 
+				cv::ml::ROW_SAMPLE, 
+				labels
 				);
 			return data_set;
+		}
+
+		template<typename _Tp> static  cv::Mat toMat(const vector<vector<_Tp> > vecIn) {
+			cv::Mat_<_Tp> matOut(vecIn.size(), vecIn.at(0).size(), CV_32F);
+			for (int i = 0; i < matOut.rows; ++i) {
+				for (int j = 0; j < matOut.cols; ++j) {
+					matOut(i, j) = vecIn.at(i).at(j);
+				}
+			}
+			Mat formatted_matOut;
+			matOut.convertTo(formatted_matOut, CV_32F);
+			return formatted_matOut;
+		}
+
+		double variance (vector <double> v) const {
+			double sum = std::accumulate(std::begin(v), std::end(v), 0.0);
+			double mean =  sum / v.size();
+		
+			double accum  = 0.0;
+			std::for_each (std::begin(v), std::end(v), [&](const double d) {
+				accum  += (d-mean)*(d-mean);
+			});
+
+			double var = accum/(v.size());
+			return var;
+		}
+
+		vector<double> get_column_vector (const size_t col) const{
+			vector<double> col_vector;
+			for (auto& row : Genes) {
+				col_vector.push_back(row[col]);
+			}
+			return col_vector;
 		}
 
 		double mse (const Ptr<ml::TrainData> dataset) const {
@@ -95,7 +131,7 @@ namespace IC {
 			// set parameters
 			float _priors[] = { 1.0, 10.0 };
 			cv::Mat priors(1, 2, CV_32F, _priors);
-			dtree->setMaxDepth(8);
+			dtree->setMaxDepth(5);
 			dtree->setMinSampleCount(10);
 			dtree->setRegressionAccuracy(0.01f);
 			dtree->setUseSurrogates(false /* true */);
@@ -137,7 +173,9 @@ namespace IC {
 			// H(z1, z2, z3) = H(z1) + H(z2|z1) + H(z3|x1, x2)
 			for (size_t i = 0; i < n; i++){
 				if (i == 0){
-					h += 0;  // variance
+					// H(z0) = variance of gene 0
+					vector<double> genes_i = get_column_vector(B_[i]);
+					h += variance(genes_i);  // variance of genes i
 				} else {
 					// H(z1|z0), H(z2|x0, x1), ...
 					// X = [0], y = 1, ..., X = [0, 1], y = 2, ...
@@ -155,7 +193,7 @@ namespace IC {
  				cout << i << ' ';
 			cout << "}" << endl;
 
-			cout << "mse error: " << h << "\n" << endl;
+			cout << "cart entropy: " << h << "\n" << endl;
 			// return 1;
 			return h;
 		}
