@@ -12,10 +12,6 @@ cd build
 cmake .. 
 make 
 ./AIC ../../data/test.csv 
-```
-
-
-``` 
 ...
 ...
 ...
