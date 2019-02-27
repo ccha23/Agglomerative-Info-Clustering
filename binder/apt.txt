@@ -1,9 +1,9 @@
 texlive-latex-base
 texlive-latex-recommended
+texlive-generic-recommended
 texlive-science
 texlive-latex-extra
 texlive-fonts-recommended
-texlive-fonts-extra
 texlive-publishers
 dvipng
 ghostscript

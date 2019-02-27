@@ -1,5 +1,6 @@
 .DS_Store
 .ipynb_checkpoints
+.vscode
 
 # Prerequisites
 *.d
@@ -42,6 +43,7 @@
 
 # PDF output - usually a bad idea to keep this in Git
 *.pdf
+!doc/*.pdf
 
 # Latexmk
 *.fdb_latexmk
