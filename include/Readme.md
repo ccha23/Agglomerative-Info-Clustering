@@ -263,3 +263,221 @@ partition at threshold 0.786681:[ [ 0 ] [ 1 ] [ 2 ] [ 3 ] ]
 partition at threshold 0.0874089:[ [ 0 2 ] [ 1 ] [ 3 ] ]
 partition at threshold -0.376819:[ [ 0 2 3 ] [ 1 ] ]
 ```
+
+
+``` 
+# for test2.csv
+./AIC ../../data/test2.csv
+
+2  2  4  4  
+2  2  4  4  
+2  2  4  4  
+2  2  5  5  
+2  2  5  5  
+2  2  5  5  
+2  2  5  5  
+3  3  5  5  
+3  3  5  5  
+3  3  5  5  
+3  3  5  5  
+3  3  5  5  
+3  3  5  5  
+3  3  5  5  
+3  3  5  5  
+3  3  5  5  
+3  3  5  5  
+3  3  5  5  
+3  3  5  5  
+3  3  5  5  
+3  3  5  5  
+3  3  5  5  
+3  3  5  5  
+3  3  5  5  
+3  3  5  5  
+3  3  5  5  
+3  3  5  5  
+3  3  5  5  
+3  3  5  5  
+3  3  5  5  
+3  3  5  5  
+Info-clustering by CL tree approximation:
+for B = {1 }
+cart entropy: 0.174818
+
+for B = {0 }
+cart entropy: 0.174818
+
+for B = {1 0 }
+cart entropy: 0.174818
+
+for B = {2 }
+cart entropy: 0.0874089
+
+for B = {0 }
+cart entropy: 0.174818
+
+for B = {2 0 }
+cart entropy: 0.174818
+
+for B = {2 }
+cart entropy: 0.0874089
+
+for B = {1 }
+cart entropy: 0.174818
+
+for B = {2 1 }
+cart entropy: 0.174818
+
+for B = {3 }
+cart entropy: 0.0874089
+
+for B = {0 }
+cart entropy: 0.174818
+
+for B = {3 0 }
+cart entropy: 0.174818
+
+for B = {3 }
+cart entropy: 0.0874089
+
+for B = {1 }
+cart entropy: 0.174818
+
+for B = {3 1 }
+cart entropy: 0.174818
+
+for B = {3 }
+cart entropy: 0.0874089
+
+for B = {2 }
+cart entropy: 0.0874089
+
+for B = {3 2 }
+cart entropy: 0.207796
+
+critical values : [ 0.174818 0.0874089 ]
+partition at threshold 0.174818:[ [ 0 ] [ 1 ] [ 2 ] [ 3 ] ]
+partition at threshold 0.0874089:[ [ 0 1 ] [ 2 ] [ 3 ] ]
+Agglomerative info-clustering:
+for B = {0 }
+cart entropy: 0.174818
+
+for B = {1 }
+cart entropy: 0.174818
+
+for B = {2 }
+cart entropy: 0.0874089
+
+for B = {3 }
+cart entropy: 0.0874089
+
+for B = {0 1 }
+cart entropy: 0.174818
+
+for B = {2 }
+cart entropy: 0.0874089
+
+for B = {0 2 }
+cart entropy: 0.174818
+
+for B = {0 1 2 }
+cart entropy: 0.238947
+
+for B = {2 }
+cart entropy: 0.0874089
+
+for B = {1 2 }
+cart entropy: 0.174818
+
+for B = {1 0 2 }
+cart entropy: 0.238947
+
+for B = {2 }
+cart entropy: 0.0874089
+
+for B = {1 2 }
+cart entropy: 0.174818
+
+for B = {1 0 2 }
+cart entropy: 0.238947
+
+for B = {3 }
+cart entropy: 0.0874089
+
+for B = {0 3 }
+cart entropy: 0.174818
+
+for B = {0 1 3 }
+cart entropy: 0.238947
+
+for B = {0 1 2 3 }
+cart entropy: 0.238947
+
+for B = {3 }
+cart entropy: 0.0874089
+
+for B = {1 3 }
+cart entropy: 0.174818
+
+for B = {1 0 3 }
+cart entropy: 0.238947
+
+for B = {1 0 2 3 }
+cart entropy: 0.238947
+
+for B = {3 }
+cart entropy: 0.0874089
+
+for B = {1 3 }
+cart entropy: 0.174818
+
+for B = {1 0 3 }
+cart entropy: 0.238947
+
+for B = {1 0 2 3 }
+cart entropy: 0.238947
+
+for B = {0 1 }
+cart entropy: 0.174818
+
+for B = {2 }
+cart entropy: 0.0874089
+
+for B = {3 }
+cart entropy: 0.0874089
+
+for B = {0 1 2 }
+cart entropy: 0.238947
+
+for B = {3 }
+cart entropy: 0.0874089
+
+for B = {0 1 3 }
+cart entropy: 0.238947
+
+for B = {0 1 2 3 }
+cart entropy: 0.238947
+
+for B = {3 }
+cart entropy: 0.0874089
+
+for B = {2 3 }
+cart entropy: 0.207796
+
+for B = {2 0 1 3 }
+cart entropy: 0.238947
+
+for B = {3 }
+cart entropy: 0.0874089
+
+for B = {0 1 3 }
+cart entropy: 0.238947
+
+for B = {0 1 2 3 }
+cart entropy: 0.238947
+
+critical values : [ 0.174818 0.0553443 ]
+partition at threshold 0.174818:[ [ 0 ] [ 1 ] [ 2 ] [ 3 ] ]
+partition at threshold 0.0553443:[ [ 0 1 ] [ 2 ] [ 3 ] ]
+
+```
