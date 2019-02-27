@@ -1,0 +1,181 @@
+\subsection{Data Structure for Representing Hierarchy of Clusters}
+\label{sec:data_structure}
+
+In this section, we describe a data structure that can record the solution of an agglomerative
+clustering algorithm efficiently, with linear space complexity, by providing the following function:
+\begin{itemize}
+	\item \merge{$i$,$j$,$`g$} runs in $O(\log n)$ time and
+	merges nodes $i,j\in V$ into the same cluster for all threshold values $<`g$.
+\end{itemize} 
+An agglomerative clustering algorithm should call \merge successively with distinct pairs of nodes and 
+non-increasing values of $`g$. After all the nodes are merged into the trivial cluster $V$, the
+following functions can be used to retrieve information about the clusters in linear/sub-linear
+time:
+\begin{itemize}
+	\item \getCriticalValues{} runs in $O(n)$ time and returns the ordered list of critical threshold
+		values $`g_{\ell}$'s in \eqref{eq:PSP} where the set of clusters changes.
+	\item \getPartition{$`g$} runs in $O(n)$ time and returns the partition $\mcP$ of $V$ such that
+		$\pzC_{`g}(\RZ_V)=\mcP`/\Set {\Set {i}\mid i\in V}$. In other words, $\mcP$ is the partition
+		$\mcP_{\ell}$ in \eqref{eq:PSP} with the smallest $`g_{\ell}\geq `g$.
+	\item \similarity{$i$,$j$} runs in $O(\log n)$ time and returns the similarity between nodes
+		$i,j\in V$ defined by $\sim_{`g}$ below \eqref{eq:clusters}.  
+\end{itemize}
+
+Internally, the hierarchy of clusters is represented by a weighted rooted tree on $V$ (with edges
+directed towards the root), in which each
+node $i\in V$ is associated with the following data:
+\begin{itemize}
+	\item \Parent{i}: The parent of $i$. If $i$ has no parent, then \Parent{$i$}$=i$.
+	\item \Children{i}: The list of children of $i$. If $i$ has no children, then the list is empty.
+	\item \Weight{i}: The weight of the edge between $i$ and its parent. It is initialized to $-`8$.
+	\item \Rank{i}: The depth of the maximal subtree rooted at $i$. It is initialized to $0$.
+\end{itemize}
+\figref{fig:data_structure} gives the pseudocode of all the functions that support the desired data structure. The idea is to represent clusters by a weighted tree $T$ where each
+edge $\Set {i,j}\in \mcE(T)$ has certain real-valued weight. %a weight $w(\Set {i,j})\in `R$:
+\begin{lbox}
+	The set of clusters at threshold $`g$ is the set $\mcP(T_{`g})`/\Set {\Set {i} \mid i\in V}$ of
+	connected components of the forest $T_{`g}$ obtained from $T$ by removing edges of weights $\geq
+	`g$.
+\end{lbox}
+%When $T$ is a CL tree, the representation is precisely the one in \eqref{eq:CL} for the approximate
+%solution. (See Example~\ref{eg:CL}.) However, in general, $T$ needs not be a CL tree and the weighted tree can represent any clustering solutions, not necessarily the one from the CL tree approximation. A clustering solution may also be represented more than one trees. As we shall see, this flexibility is beneficial for efficiency. %can also 
+%In general, $T$ needs not be the CL tree, to provides an added flexibility for efficient construction.
+%In general, $T$ can be used as an efficient representation for the clustering solution
+%of any agglomorotive algorithm, where in this case the construction of $T$ (described below) uses
+%the critical values $`g$ returned by the agglomorotive algorithm. 
+
+The function \initialize constructs the leaves, namely, the singleton subsets $\Set{i}$ for $i\in V$.
+To construct $T$ starting from its leaves, we call the function \merge{$i,j,`g$} for some $i,j,`g$, which verifies if $i$ and $j$ are already connected in $T$, and
+if not, adds an edge with weight $`g$ between any node $i'$ connected to $i$ and any node $j'$
+connected to $j$. The computational complexity is $O(\log n)$ if the verification of connectedness can be
+done in $O(\log n)$ time. This can be done using the same idea as the disjoint-set forest 
+with union by rank~\cite{galler64,tarjan84}, by providing the function: 
+\begin{itemize}
+	\item \find{$i$} runs in $O(\log n)$ time and returns a representative of the component containing $i$.
+\end{itemize}
+%Assuming two nodes in the same connected components have the same representative, 
+Then, node $i$ is connected to node $j$ iff \find{$i$}$=$\find{$j$}.
+%, which can be checked in $O(\log n)$ time as desired.
+To implement \find, with the desired $O(\log n)$ complexity, the partial clustering solution is represented by a rooted
+forest where each connected component is a rooted tree and so \find can simply return the root of
+the tree as the representative of the component.
+%Let $i'$ and $j'$ be the roots of the components containing $i$ and $j$, respectively.
+To maintain the invariance that the graph is a
+rooted forest, \merge{$i,j,`g$} adds a directed edge with weight $`g$ between the root $i'$ of $i$
+and the root $j'$ of $j$ if $i'\neq j'$. To ensure $O(\log n)$ complexity for \find and therefore
+\merge, the root of the deeper tree is chosen to be the parent of the other root since this 
+ensures that the depth of any tree in the forest to be $O(\log n)$ at all times. Note that, different from \cite{felzenszwalb2004efficient}, the path compression technique for disjoint-set forest cannot be adopted here as it would destroy the hierarchical structure. 
+
+\begin{figure}
+	{%\scriptsize
+		\setlength{\algomargin}{0.4em}
+		\noindent\begin{minipage}[t]{.45\linewidth}
+			\begin{algorithm}[H]
+				\myfn(\label{ln:initialize}){\initialize{}}{
+                	\For{$i\in V$}{
+                		\Parent{$i$}$"<-"i$,
+                		\Children{$i$}$"<-"$empty list,
+                		\Weight{$i$}$"<-"-`8$,
+                		\Rank{$i$}$"<-"0$;\;
+                    }
+            	}
+            	\BlankLine
+				\myfn(\label{ln:find}){\find{$i$}}{
+					%\KwIn{}
+					%\KwOut{}
+					%\BlankLine
+					\KwRet (\Parent{$i$}$=i$? $i$ : \find{\Parent{$i$}});\;
+				}
+				\BlankLine
+				\myfn(\label{ln:merge}){\merge{$i$,$j$,$`g$}}{
+					$i'"<-"$\find{$i$},
+					$j'"<-"$\find{$j$};\;
+					\lIf{$i'$=$j'$}{\KwRet;}
+					\uIf{\Rank{$i'$}$<$\Rank{$j'$}}{
+						\Parent{$i'$}$"<-"j'$;\;
+						add $i'$ to \Children{$j'$};\;
+						\Weight{$i'$}$"<-"`g$;\;
+					}
+					\Else {
+						\Parent{$j'$}$"<-"i'$;\;
+						add $j'$ to \Children{$i'$};\;
+						\Weight{$j'$}$"<-"`g$;\;
+						\lIf{\Rank{$i'$}$=$\Rank{$j'$}}{
+						\Rank{$j'$}$"<-"$\Rank{$j'$}+1;}
+					}
+				}
+			\end{algorithm}
+		\end{minipage}
+		\begin{minipage}[t]{.45\linewidth}
+			\begin{algorithm}[H]
+				\myfn(\label{ln:getCriticalValues}){\getCriticalValues{}}{
+					%\KwIn{}
+					%\KwOut{}
+					%\BlankLine
+					\KwRet \DataSty{weight};\;
+				}
+				\BlankLine
+				\myfn(\label{ln:getPartition}){\getPartition{$`g$}}{
+					$S"<-"V$, $\mcP"<-"`0$;\;
+					\While{$S\neq `0$}{
+						$i"<-"$ any node from $S$;\;
+						$B"<-"$ set of nodes reachable from $i$, by going from a reachable node $j$ to \Parent{$j$} if \Weight{$i$}$>`g$ and to $j'\in$\Children{$j$} if \Weight{$j'$}$>`g$;\;
+						$S"<-"S`/B$, add $B$ to $\mcP$;\;
+					}
+				}
+				\BlankLine
+				\vspace{.4em}
+				\myfn(\label{ln:similarity}){\similarity{$i$,$j$}}{
+					\lIf{$i=j$}{\KwRet $`8$;}
+					$i'"<-"$\Parent{$i$},
+					$j'"<-"$\Parent{$j$},
+					$`g_i"<-"$\Weight{$i$},
+					$`g_j"<-"$\Weight{$j$};\;
+					\lIf{$i'=j$}{\KwRet $`g_i$;}
+					\lIf{$j'=i$}{\KwRet $`g_j$;}
+					\KwRet ($`g_i\geq`g_j$? \similarity{$i'$,$j$} : \similarity{$i$,$j'$});\;
+				}
+			\end{algorithm}
+		\end{minipage}
+	}
+	\caption{Pseudocode to construct (left) and query (right) the data structure for the clustering solution.}
+	\label{fig:data_structure}
+\end{figure}
+
+Finally, using the data structure described above, the agglomerative info-clustering algorithm in Algorithm~\ref{alg:aic} and \ref{algo:fuse} can be implemented as shown in Algorithm~\ref{algo:aic-tree}.
+
+\begin{algorithm}
+	\caption{Implementation of Agglomerative info-clustering using an efficient data structure.}
+    \label{algo:aic-tree}
+	\BlankLine
+	%\KwData{$\mcP_{\ell}, \mcP_{\ell+1}, \dots, \mcP_{N}$ in \eqref{eq:PSP} for some $1\leq \ell \leq N$ have been recorded by the data structure.}
+	%\KwResult{$\mcP_{\ell-1}$, if any, i.e., $\ell>1$, is recorded by the data structure.}
+	\KwData{Statistics of $\RZ_V$ sufficient for calculating the entropy function $h(B)$ for
+	$B\subseteq V:=\{1,\ldots,n\}$.}
+	\KwResult{Info-clustering solution in Proposition~\ref{prop:clusters} recorded by \Parent, \Children, \Weight and \Rank.}
+	\initialize{};\;
+	$\mcP\leftarrow$\getPartition{$-1$};$k\leftarrow \abs{\mcP}$;\;
+	\While{$k>1$}{
+    	\If{$k\leq 1$}{\KwRet false;\;}
+    	\DataSty{x}$\leftarrow$ empty array of size $k$;\;
+    	\For{$j\leftarrow 1$ \emph{\KwTo} $k$ }{
+    		%\DataSty{x}[$j$]=\MinNormBase($ B\mapsto h`1(\bigcup_{i\in B\cup\Set{j}}C_i`2)-\sum_{i\in B\cup\Set{j}}h(C_i),\Set{j+1,\ldots,k}$);\; \label{ln:MNB:1}
+    		Define $g_j$ as the function $ B\subseteq \{j+1,\dots,k\}  \mapsto h`1(\bigcup_{i\in B\cup\Set{j}}C_i`2)-\sum_{i\in B\cup\Set{j}}h(C_i)$;\; 
+    		\DataSty{x}[$j$]$\leftarrow$\MinNormBase($g_j,\Set{j+1,\ldots,k}$);\; \label{ln:MNB:1}
+    	}
+    	%\KwRet $(\upgamma_1(\RZ_B),\pzC_{\upgamma_1}(\RZ_B))$;
+    	$\displaystyle`g\leftarrow -\min_{i,j:1\leq j<i\leq k}\DataSty{x}[j][i]$;\;
+    	\For{$j \leftarrow 1$ \emph{\KwTo} $k$ }{
+    	    \For{$i \leftarrow 1$ \emph{\KwTo} $j-1$ }{
+        		\If{$\DataSty{x}[j][i]\kern-.25em\leq\kern-.25em -`g$}{
+        			\merge{$u$,$v$,$`g$} for an arbitrary $u\in C_i$ and an arbitrary $v\in C_j$;\; 
+        			%add $C_j \cup \bigcup\Set{C_i\mid i\kern-.25em\in\kern-.25em\Set{j\kern-.25em
+        			%+\kern-.25em 1,\dots,k}, \DataSty{x}[j][i]\kern-.25em\leq\kern-.25em -`g}$ to $\mcP'$;\;
+        		}
+    		}
+		}
+		$\mcP\leftarrow$\getPartition{$-1$};$k\leftarrow \abs{\mcP}$;\;
+	}
+\end{algorithm}
+    
+
