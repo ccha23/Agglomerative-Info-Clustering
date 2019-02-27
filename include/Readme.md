@@ -6,11 +6,14 @@ Compile using cmake:
 
 after installing opencv, use to following command to compile and run the demo
 
-mkdir build
-cd build
-cmake ..
-make
-./AIC ../../data/test.csv
+```
+mkdir build 
+cd build 
+cmake .. 
+make 
+./AIC ../../data/test.csv 
+```
+
 
 ``` 
 test.csv
