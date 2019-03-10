@@ -338,7 +338,7 @@ namespace IC {
 		@param eps Precision
 		*/
 		bool agglomerate(double fn_tol, double eps) {
-			double gamma = -1;
+			double gamma = -INFINITY;
 			vector<vector<size_t>> P=this->getPartition(gamma);
 			if (P.size() <= 1) return false;
 			SF_ f_(f,P);
