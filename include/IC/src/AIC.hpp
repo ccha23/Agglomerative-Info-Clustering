@@ -342,10 +342,10 @@ namespace IC {
 			vector<vector<size_t>> P=this->getPartition(gamma);
 			if (P.size() <= 1) return false;
 			SF_ f_(f,P);
-			size_t n = P.size();
+			size_t k = P.size();
 			//cout << "P : " << P << endl;
-			vector<VectorXd> x(n - 1);
-			for (size_t j = 1; j < n; j++) {
+			vector<VectorXd> x(k - 1);
+			for (size_t j = 1; j < k; j++) {
 				SF__ f__(f_, j);
 				//cout << "j : " << j << endl;
 				x[j-1] = min_norm_base(f__,fn_tol,eps);
@@ -353,7 +353,7 @@ namespace IC {
 				gamma = max(gamma, -(x[j-1].minCoeff()));
 			}
 			//cout << "gamma : " << gamma << endl;
-			for (size_t j = 1; j < n; j++) {
+			for (size_t j = 1; j < k; j++) {
 				for (size_t i = 0; i < j; i++) {
 					//cout << x[j - 1](i) << endl;
 					if (x[j - 1](i) <= -gamma + fn_tol) // instead of eps, = is required to handle -INFINITY

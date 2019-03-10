@@ -4,12 +4,7 @@
 \usepackage[ruled,vlined,linesnumbered]{algorithm2e}
 \usepackage[noend]{algpseudocode}
 \input{preamble}
-\SetKwProg{myfn}{function}{:}{end}
-\SetKwFunction{MinNormBase}{MinNormBase}
-\DontPrintSemicolon
-\SetAlgoLined
-\SetKwFunction{FirstClusters}{FirstClusters}
-\SetKwFunction{Agglomerate}{Agglomerate}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage{blkarray}
@@ -21,13 +16,12 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-\title{Agglomerative Info-Clustering}
+\title{Agglomerative Info-Clustering:\\ Composing MMI from Total Correlation}
 \author{Chung Chan, Ali Al-Bashabsheh and Qiaoqiao Zhou
 	\thanks{C.\ Chan (corresponding author, email:
-          chung.chan@cityu.edu.hk) is with the Department of Computer Science, City University of Hong Kong. His work was supported in part by a grant
+          chung.chan@cityu.edu.hk) is with the Department of Computer Science, City University of Hong Kong. His work was supported by a grant
           from the University Grants Committee of the Hong Kong Special Administrative Region,
-          China (Project No. 14200714) and in part by a grant from
-          City University of Hong Kong (Project No. 7200564).}
+          China (Project No. 21203318).}
         \thanks{A. Al-Bashabsheh is with the Big Data and Brain
           Computing (BDBC) center at Beihang University, Beijing, China (e-mail:
           entropyali@gmail.com).}
@@ -46,7 +40,7 @@
 \maketitle
 
 \begin{abstract}
-We show that correlated random variables can be clustered more efficiently in an agglomerative manner rather than a divisive one. The agglomerative approach successively merges subsets of random variables sharing a large amount of normalized total correlation. Compared to the existing divisive approach that successively segregates the random variables into subsets with increasing multivariate mutual information, the agglomerative approach gives the same hierarchy of clusters faster by an order of magnitude.  The underlying results justifying the agglomerative approach are also of theoretical interest since they reveal a fundamental connection between the well-known total correlation and the recently proposed multivariate mutual information.
+We show that, under the info-clustering framework, correlated random variables can be clustered more naturally in an agglomerative manner rather than a divisive one. The agglomerative approach successively merges subsets of random variables sharing a large amount of normalized total correlation. Compared to the existing divisive approach that successively segregates the random variables into subsets with increasing multivariate mutual information (MMI), the agglomerative approach gives the same hierarchy of clusters faster by an order of magnitude.  More importantly, the underlying results justifying the agglomerative approach are of theoretical interest since they reveal a fundamental connection between the well-known total correlation and the recently proposed MMI. %We implemented the algorithm with an efficient implementation using a matrix-free data structure for a simple Gaussian model with additive noise.
 \end{abstract} 
 
 %\begin{keywords}
@@ -96,7 +90,7 @@ We show that correlated random variables can be clustered more efficiently in an
 
 \input{agglomerative}
 
-\input{complexity}
+\input{datastructure}
 
 \input{conc}
 

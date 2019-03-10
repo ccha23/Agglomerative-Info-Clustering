@@ -102,7 +102,7 @@ norm base for \eqref{eq:MNB}. An explicit implementation of \MinNormBase can be 
 %The current abstraction also allows further approximations or simplifications for special source models as in \cite{chan16cluster}. 
 
 \begin{algorithm}
-	\caption{Implementation of \texttt{Agglomerate}.}% in Algorithm~\ref{alg:aic}.}
+	\caption{Implementation of \texttt{agglomerate}.}% in Algorithm~\ref{alg:aic}.}
 	\label{algo:fuse}
 	%	\KwData{Statistics of $\RZ_V$ sufficient for calculating \FirstClusters{$B$} for all $B\subseteq V:\abs{B}>1$.}
 	%	\KwResult{$\mcS$ is a list of $(I(\RZ_C),C)$ for $C\in \pzC(\RZ_V)$, which gives
@@ -115,14 +115,14 @@ norm base for \eqref{eq:MNB}. An explicit implementation of \MinNormBase can be 
 	%\myfn{\Agglomerate{$\mcP$}}{
 		Enumerate $\mcP$ as $\Set{C_1,\dots,C_k}$ for some $k>1$ and disjoint $C_i$'s;\;
 		\DataSty{x}$\leftarrow$ empty array of size $k$;\;
-		\For{$j = 1$ \emph{\KwTo} $k$ }{
+		\For{$j\leftarrow 1$ \emph{\KwTo} $k$ }{
 			%\DataSty{x}[$j$]=\MinNormBase($ B\mapsto h`1(\bigcup_{i\in B\cup\Set{j}}C_i`2)-\sum_{i\in B\cup\Set{j}}h(C_i),\Set{j+1,\ldots,k}$);\; \label{ln:MNB:1}
 			Define $g_j$ as the function $ B\subseteq \{j+1,\dots,k\}  \mapsto h`1(\bigcup_{i\in B\cup\Set{j}}C_i`2)-\sum_{i\in B\cup\Set{j}}h(C_i)$;\; 
-			\DataSty{x}[$j$]=\MinNormBase($g_j,\Set{j+1,\ldots,k}$);\; \label{ln:MNB:1}
+			\DataSty{x}[$j$]$\leftarrow$\MinNormBase($g_j,\Set{j+1,\ldots,k}$);\; \label{ln:MNB:1}
 		}
 		%\KwRet $(\upgamma_1(\RZ_B),\pzC_{\upgamma_1}(\RZ_B))$;
 		$\displaystyle`g\leftarrow -\min_{i,j:1\leq j<i\leq k}\DataSty{x}[j][i]$,\kern1em$\mcP'\leftarrow`0$;\;
-		\For{$j = 1$ \emph{\KwTo} $k$ }{
+		\For{$j \leftarrow 1$ \emph{\KwTo} $k$ }{
 			\If{$C_j\nsubseteq \bigcup\mcP'$}{
 				%add $\Set{C_j}\cup\Set{C_i\mid i\kern-.25em\in\kern-.25em\Set{j\kern-.25em +\kern-.25em 1,\dots,k}, \DataSty{x}[j][i]\kern-.25em\leq\kern-.25em -`g}$ to $\mcP'$;\;
 				add $C_j \cup \bigcup\Set{C_i\mid i\kern-.25em\in\kern-.25em\Set{j\kern-.25em
@@ -443,6 +443,20 @@ where $\bigcup \mcF:=\bigcup_{B\in \mcF} B$ for convenience.
 	At this point the agglomerative algorithm
 	terminates.
 \end{example}
+
+
+The complexity of \Agglomerate (Algorithm~\ref{algo:fuse}) is mainly due to the computation of the
+minimum norm base in line~\ref{ln:MNB:1}.  This computation is repeated at most $n$ times.  With
+$\op{MNB}(n)$ denoting the complexity of the minimum norm base algorithm for a ground set of size $n$,
+\Agglomerate runs in time $O(n\op{MNB}(n))$. Since the agglomerative info-clustering algorithm in
+Algorithm~\ref{alg:aic} invokes function \Agglomerate $N-1\leq n-1$ times, it runs in time $O(n^2
+\op{MNB}(n))$, which is equivalent to that of~\cite[Algorithm~3]{chan16cluster}, assuming that the
+submodular function minimization therein is implemented by the minimum norm base algorithm, i.e.,
+with $\op{SFM}=\op{MNB}$. In contrast, the divisive info-clustering algorithm
+in~\cite[Algorithm~2]{chan16cluster} makes $N-1$ calls to a subroutine that calculates the
+fundamental partition. However, computing the fundamental partition appears to take time $O(n^2
+\op{MNB}(n))$, which leads to an overall complexity of $O(n^3 \op{MNB}(n))$ for the divisive
+clustering.
 
 %\begin{Proof}[Sketch for Theorem~\ref{thm:`g:P:fused}]
 %	To prove \eqref{eq:A:`g_l}, we first argue that, for any feasible $\mcF$ to the r.h.s.\ of~\eqref{eq:A:`g_l}, 
