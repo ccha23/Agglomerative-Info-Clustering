@@ -5,6 +5,7 @@
 #include <IC/AIC>
 #include <time.h>
 #include <fstream>
+#include <string>
 
 using namespace std;
 using namespace Eigen;
@@ -12,16 +13,17 @@ using namespace IC;
 
 int main(int argc, char **argv) {
     std::ifstream f;
-
-    if (argc > 1) {         /* if argument given */
+	string model;
+    if (argc > 2) {         /* if argument given */
         f.open (argv[1]);   /* open file with filename as argument */
         if (! f.is_open()) {    /* validate file open for reading */
             std::cerr << "error: file open failed '" << argv[1] << "'.\n";
             return 1;
         }
+		model = argv[2];
     }
     else {  /* no argument given, error show usage */
-        std::cerr << "error: insufficient input. <filename> required.\n";
+        std::cerr << "error: insufficient input. <filename> <model(\"cart\" or \"svr\")required.\n";
         return 1;
     }
 
@@ -32,7 +34,7 @@ int main(int argc, char **argv) {
         std::vector<double> v;                 /* row vector v */
         std::stringstream s (line);         /* stringstream line */
         while (getline (s, val, ','))       /* get each value (',' delimited) */
-            v.push_back (std::stoi (val));  /* add to row vector */
+            v.push_back (std::stod (val));  /* add to row vector */
         array.push_back (v);                /* add row vector to array */
     }
 
@@ -41,8 +43,8 @@ int main(int argc, char **argv) {
             std::cout << val << "  ";       /* output value      */
         std::cout << "\n";                  /* tidy up with '\n' */
     }
-
-    CartEntropy csf(array);
+	fflush(stdout);
+    CartEntropy csf(array, model);
     // HardCodeEntropy csf(0);
     // CartEntropy csf("../../data/GDS3893.soft");
     size_t n = csf.size();

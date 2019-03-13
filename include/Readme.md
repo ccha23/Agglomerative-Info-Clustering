@@ -11,7 +11,8 @@ mkdir build
 cd build 
 cmake .. 
 make 
-./AIC ../../data/test.csv 
+./AIC ../../data/test.csv cart  # for cart algorithm 
+# ./AIC ../../data/test.csv svr  # for svm algorithm 
 ...
 ...
 ...
@@ -25,7 +26,9 @@ partition at threshold 0.110689:[ [ 0 2 3 ] [ 1 ] ]
 
 ``` 
 # for test2.csv
-./AIC ../../data/test2.csv
+./AIC ../../data/test2.csv cart
+# ./AIC ../../data/test2.csv svr
+
 
 ...
 ...
@@ -37,4 +40,11 @@ partition at threshold 0.0874089:[ [ 0 1 ] [ 2 ] [ 3 ] ]
 partition at threshold 0.0232797:[ [ 0 1 ] [ 2 3 ] ]
 
 
+```
+
+# Generate syncthetic data with Additive White Gaussian Noise model
+``` example usage
+python ../../data/AGWN.py --ngenes 6 --nclusters 3 --nconditions 80 --sigma 0.5 --outcsv ../../data/awgn.csv
+# awgn.csv will be the generated data
+./AIC ../../data/awgn.csv cart
 ```

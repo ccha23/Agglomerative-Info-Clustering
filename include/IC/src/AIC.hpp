@@ -338,7 +338,7 @@ namespace IC {
 		@param eps Precision
 		*/
 		bool agglomerate(double fn_tol, double eps) {
-			double gamma = -100000;
+			double gamma = -1000000000000;
 			vector<vector<size_t>> P=this->getPartition(gamma);
 			// cout << "gamma:" << gamma << endl;
 			// cout << P << endl;
