@@ -1,8 +1,8 @@
-\subsection{Data Structure for Representing Hierarchy of Clusters}
+\section{Data Structure for Representing Hierarchy of Clusters}
 \label{sec:data_structure}
 
-In this section, we describe a data structure that can record the solution of an agglomerative
-clustering algorithm efficiently, with linear space complexity, by providing the following function:
+In this section we describe a data structure that can record the solution of an agglomerative
+clustering algorithm efficiently, namely, with linear space complexity, by providing the following function:
 \begin{itemize}
 	\item \merge{$i$,$j$,$`g$} runs in $O(\log n)$ time and
 	merges nodes $i,j\in V$ into the same cluster for all threshold values $<`g$.
@@ -17,12 +17,11 @@ time:
 	\item \getPartition{$`g$} runs in $O(n)$ time and returns the partition $\mcP$ of $V$ such that
 		$\pzC_{`g}(\RZ_V)=\mcP`/\Set {\Set {i}\mid i\in V}$. In other words, $\mcP$ is the partition
 		$\mcP_{\ell}$ in \eqref{eq:PSP} with the smallest $`g_{\ell}\geq `g$.
-	\item \similarity{$i$,$j$} runs in $O(\log n)$ time and returns the similarity between nodes
-		$i,j\in V$ defined by $\sim_{`g}$ below \eqref{eq:clusters}.  
+	\item \similarity{$i$,$j$} runs in $O(\log n)$ time and returns the critical value at which nodes $i,j\in V$ no longer belong to the same cluster, i.e., the largest critical value $`g_{\ell}$ s.t. $i$ and $j$ belong to the same cluster for all thresholds $\gamma' < `g_{\ell}$.
+
 \end{itemize}
 
-Internally, the hierarchy of clusters is represented by a weighted rooted tree on $V$ (with edges
-directed towards the root), in which each
+Internally, the hierarchy of clusters is represented by a weighted rooted tree on $V$, in which each
 node $i\in V$ is associated with the following data:
 \begin{itemize}
 	\item \Parent{i}: The parent of $i$. If $i$ has no parent, then \Parent{$i$}$=i$.
@@ -32,26 +31,24 @@ node $i\in V$ is associated with the following data:
 \end{itemize}
 \figref{fig:data_structure} gives the pseudocode of all the functions that support the desired data structure. The idea is to represent clusters by a weighted tree $T$ where each
 edge $\Set {i,j}\in \mcE(T)$ has certain real-valued weight. %a weight $w(\Set {i,j})\in `R$:
-\begin{lbox}
-	The set of clusters at threshold $`g$ is the set $\mcP(T_{`g})`/\Set {\Set {i} \mid i\in V}$ of
-	connected components of the forest $T_{`g}$ obtained from $T$ by removing edges of weights $\geq
+
+\begin{Definition}
+\label{def:data-structure}
+	Given a tree $T$, the set of clusters at threshold $`g$ is the set $\mcP(T_{`g})`/\Set {\Set {i} \mid i\in V}$ of
+	connected components of the forest $T_{`g}$ obtained from $T$ by removing edges of weights $\leq
 	`g$.
-\end{lbox}
-%When $T$ is a CL tree, the representation is precisely the one in \eqref{eq:CL} for the approximate
-%solution. (See Example~\ref{eg:CL}.) However, in general, $T$ needs not be a CL tree and the weighted tree can represent any clustering solutions, not necessarily the one from the CL tree approximation. A clustering solution may also be represented more than one trees. As we shall see, this flexibility is beneficial for efficiency. %can also 
-%In general, $T$ needs not be the CL tree, to provides an added flexibility for efficient construction.
-%In general, $T$ can be used as an efficient representation for the clustering solution
-%of any agglomorotive algorithm, where in this case the construction of $T$ (described below) uses
-%the critical values $`g$ returned by the agglomorotive algorithm. 
+\end{Definition}
 
 The function \initialize constructs the leaves, namely, the singleton subsets $\Set{i}$ for $i\in V$.
 To construct $T$ starting from its leaves, we call the function \merge{$i,j,`g$} for some $i,j,`g$, which verifies if $i$ and $j$ are already connected in $T$, and
 if not, adds an edge with weight $`g$ between any node $i'$ connected to $i$ and any node $j'$
-connected to $j$. The computational complexity is $O(\log n)$ if the verification of connectedness can be
+connected to $j$.
+(A more specific choice of $i'$ and $j'$ will be discussed shortly.)
+The computational complexity is $O(\log n)$ if the verification of connectedness can be
 done in $O(\log n)$ time. This can be done using the same idea as the disjoint-set forest 
 with union by rank~\cite{galler64,tarjan84}, by providing the function: 
 \begin{itemize}
-	\item \find{$i$} runs in $O(\log n)$ time and returns a representative of the component containing $i$.
+	\item \find{$i$} that runs in $O(\log n)$ time and returns a representative of the component containing $i$.
 \end{itemize}
 %Assuming two nodes in the same connected components have the same representative, 
 Then, node $i$ is connected to node $j$ iff \find{$i$}$=$\find{$j$}.
@@ -61,7 +58,7 @@ forest where each connected component is a rooted tree and so \find can simply r
 the tree as the representative of the component.
 %Let $i'$ and $j'$ be the roots of the components containing $i$ and $j$, respectively.
 To maintain the invariance that the graph is a
-rooted forest, \merge{$i,j,`g$} adds a directed edge with weight $`g$ between the root $i'$ of $i$
+rooted forest, \merge{$i,j,`g$} adds a edge with weight $`g$ between the root $i'$ of $i$
 and the root $j'$ of $j$ if $i'\neq j'$. To ensure $O(\log n)$ complexity for \find and therefore
 \merge, the root of the deeper tree is chosen to be the parent of the other root since this 
 ensures that the depth of any tree in the forest to be $O(\log n)$ at all times. Note that, different from \cite{felzenszwalb2004efficient}, the path compression technique for disjoint-set forest cannot be adopted here as it would destroy the hierarchical structure. 
@@ -81,27 +78,31 @@ ensures that the depth of any tree in the forest to be $O(\log n)$ at all times.
             	}
             	\BlankLine
 				\myfn(\label{ln:find}){\find{$i$}}{
-					%\KwIn{}
-					%\KwOut{}
-					%\BlankLine
-					\KwRet (\Parent{$i$}$=i$? $i$ : \find{\Parent{$i$}});\;
+					\lIf{\Parent{$i$}=$i$}{
+						\KwRet $i$;
+					}
+					\lElse {
+						\KwRet \find{\Parent{$i$}};
+					}
+
 				}
 				\BlankLine
 				\myfn(\label{ln:merge}){\merge{$i$,$j$,$`g$}}{
 					$i'"<-"$\find{$i$},
 					$j'"<-"$\find{$j$};\;
 					\lIf{$i'$=$j'$}{\KwRet;}
-					\uIf{\Rank{$i'$}$<$\Rank{$j'$}}{
+					\uIf{\Rank{$i'$} $\leq$ \Rank{$j'$}}{
 						\Parent{$i'$}$"<-"j'$;\;
 						add $i'$ to \Children{$j'$};\;
 						\Weight{$i'$}$"<-"`g$;\;
-					}
+						\lIf{\Rank{$i'$}$=$\Rank{$j'$}}{
+						\Rank{$j'$}$"<-"$\Rank{$j'$}+1;
+						}
+					}					
 					\Else {
 						\Parent{$j'$}$"<-"i'$;\;
 						add $j'$ to \Children{$i'$};\;
 						\Weight{$j'$}$"<-"`g$;\;
-						\lIf{\Rank{$i'$}$=$\Rank{$j'$}}{
-						\Rank{$j'$}$"<-"$\Rank{$j'$}+1;}
 					}
 				}
 			\end{algorithm}
@@ -119,7 +120,7 @@ ensures that the depth of any tree in the forest to be $O(\log n)$ at all times.
 					$S"<-"V$, $\mcP"<-"`0$;\;
 					\While{$S\neq `0$}{
 						$i"<-"$ any node from $S$;\;
-						$B"<-"$ set of nodes reachable from $i$, by going from a reachable node $j$ to \Parent{$j$} if \Weight{$i$}$>`g$ and to $j'\in$\Children{$j$} if \Weight{$j'$}$>`g$;\;
+						$B"<-"$ set of nodes reachable from $i$, by going from a reachable node $j$ to \Parent{$j$} if \Weight{$j$}$>`g$ and to $j'\in$\Children{$j$} if \Weight{$j'$}$>`g$;\;
 						$S"<-"S`/B$, add $B$ to $\mcP$;\;
 					}
 				}
@@ -133,7 +134,13 @@ ensures that the depth of any tree in the forest to be $O(\log n)$ at all times.
 					$`g_j"<-"$\Weight{$j$};\;
 					\lIf{$i'=j$}{\KwRet $`g_i$;}
 					\lIf{$j'=i$}{\KwRet $`g_j$;}
-					\KwRet ($`g_i\geq`g_j$? \similarity{$i'$,$j$} : \similarity{$i$,$j'$});\;
+					\uIf{$`g_i \geq `g_j$}{ 
+						\KwRet \similarity{$i'$,$j$};\;
+					}
+					\lElse{
+						\KwRet \similarity{$i$,$j'$};
+					}
+
 				}
 			\end{algorithm}
 		\end{minipage}
@@ -154,14 +161,13 @@ Finally, using the data structure described above, the agglomerative info-cluste
 	$B\subseteq V:=\{1,\ldots,n\}$.}
 	\KwResult{Info-clustering solution in Proposition~\ref{prop:clusters} recorded by \Parent, \Children, \Weight and \Rank.}
 	\initialize{};\;
-	$\mcP\leftarrow$\getPartition{$-1$};$k\leftarrow \abs{\mcP}$;\;
+	$\mcP\leftarrow$\getPartition{$-\infty$};$k\leftarrow \abs{\mcP}$;\;
 	\While{$k>1$}{
-    	\If{$k\leq 1$}{\KwRet false;\;}
     	\DataSty{x}$\leftarrow$ empty array of size $k$;\;
     	\For{$j\leftarrow 1$ \emph{\KwTo} $k$ }{
     		%\DataSty{x}[$j$]=\MinNormBase($ B\mapsto h`1(\bigcup_{i\in B\cup\Set{j}}C_i`2)-\sum_{i\in B\cup\Set{j}}h(C_i),\Set{j+1,\ldots,k}$);\; \label{ln:MNB:1}
     		Define $g_j$ as the function $ B\subseteq \{j+1,\dots,k\}  \mapsto h`1(\bigcup_{i\in B\cup\Set{j}}C_i`2)-\sum_{i\in B\cup\Set{j}}h(C_i)$;\; 
-    		\DataSty{x}[$j$]$\leftarrow$\MinNormBase($g_j,\Set{j+1,\ldots,k}$);\; \label{ln:MNB:1}
+    		\DataSty{x}[$j$]$\leftarrow$\MinNormBase($g_j,\Set{j+1,\ldots,k}$);\; %\label{ln:MNB:1}
     	}
     	%\KwRet $(\upgamma_1(\RZ_B),\pzC_{\upgamma_1}(\RZ_B))$;
     	$\displaystyle`g\leftarrow -\min_{i,j:1\leq j<i\leq k}\DataSty{x}[j][i]$;\;
@@ -174,8 +180,62 @@ Finally, using the data structure described above, the agglomerative info-cluste
         		}
     		}
 		}
-		$\mcP\leftarrow$\getPartition{$-1$};$k\leftarrow \abs{\mcP}$;\;
+		$\mcP\leftarrow$\getPartition{$-\infty$};$k\leftarrow \abs{\mcP}$;\;
 	}
 \end{algorithm}
     
+The following example demonstrates Algorithm~\ref{algo:aic-tree} and the data structure in this section.
+\begin{example}
+	\label{eg:data}
+	\input{fig-egdata.tex}
+	Consider our running example~\eqref{eq:eg-motivate} with $V = \Set{1,\ldots,6}$.
+	In Algorithm~~\ref{algo:aic-tree}, the function \initialize{} results in the empty forest in Fig.~\ref{fig:tree0}, where each node is a root, i.e., \Parent{$i$}~$ = i$ for
+	$i\in V$. (A root is highlighted in gray.)
+	After initialization, the function
+	\getPartition{$-\infty$} returns the singletons partition $\mcP = \Set{\Set{i}\mid i \in V}$ of size
+	$k = 6$ since initially \Weight{$i$}~$ = -\infty$, for $i\in V$, and so the only node reachable
+	from $i$ is node $i$ itself. Subsequently, the algorithm computes the minimum norm base
+	$\DataSty{x}[j]$, whose minimum entry is given as
+	$\DataSty{x}[j][i] = -2$ for $j \in C_1 = \Set{1}, i\in C_2 = \Set{2}$,
+	as we saw in Example~\ref{eg:IC*}, resulting in $\gamma = 2$. Now, the algorithm updates the tree by calling
+	\merge{$2,1,2$}, which sets \Parent{$2$}~$ = 1$, \Weight{$2$}~$ = 2$, \Children{$1$}~$ = \Set{2}$,
+	\Rank{$1$}~$=1$, and leaves all other variables unchanged. See Fig.~\ref{fig:tree1}.
+
+	Next, the function
+	\getPartition{$-\infty$} returns the partition $\mcP = \Set{\Set{1,2}, \Set{3},
+	\Set{4}, \Set{5}, \Set{6}}$ (corresponding to the connected components in~\ref{fig:tree1}) of size
+	$k = 5$.
+	%since $\Weight{$2$} = 2 > -1$ and $\Weight{$i$} = -\infty$ for $i\in V \backslash \Set{2}$. 
+	Subsequently, the algorithm computes the minimum norm base
+	$\DataSty{x}[j]$, whose minimum entry is given as
+	$\DataSty{x}[j][i] = -1$ for $j \in C_1 = \Set{1,2}$ and $i\in C_2 = \Set{3}$,
+	and for $j \in C_3 = \Set{4}$ and $i\in C_4 = \Set{5}$,
+	as we saw in Example~\ref{eg:thms}, resulting in $\gamma = 1$. Now, the algorithm updates the tree by calling
+	\merge{$3,2,1$}, which sets \Parent{$3$}~$ = 1$, \Weight{$3$}~$ = 1$, \Children{$1$}~$ = \Set{2,3}$,
+	and leaves all other variables unchanged. (Equivalently, one may call
+	\merge{$3,1,1$}, which leads to the same result.)
+	The algorithm then calls \merge{$5,4,1$}, which sets \Parent{$5$}~$ = 4$, \Weight{$5$}~$ = 1$,
+	\Children{$4$}~$ = \Set{5}$, \Rank{$4$}~$ = 1$, 
+	and leaves all other variables unchanged.
+	See Fig.~\ref{fig:tree2}. 
+
+	Next, the function
+	\getPartition{$-\infty$} returns the partition $\mcP = \Set{\Set{1,2,3}, \Set{4,5}, \Set{6}}$
+	(corresponding to the connected components in~\ref{fig:tree2})
+	of size $k = 3$. 
+	Subsequently, the algorithm computes the minimum norm base
+	$\DataSty{x}[j]$, whose minimum entry is given as
+	$\DataSty{x}[j][i] = 0$ for $j \in C_1 = \Set{1,2,3}$ and $i\in C_2 \cup C_3 = \Set{4,5,6}$,
+	and for $j \in C_2 = \Set{4,5}$ and $i\in C_3 = \Set{6}$,
+	as we saw in Example~\ref{eg:thms}, resulting in $\gamma = 0$. Now, the algorithm updates the tree by calling
+	\merge{$4,1,0$}, which sets \Parent{$4$}~$ = 1$, \Weight{$4$}~$ = 0$, \Children{$1$}~$ = \Set{2,3,4}$, \Rank{$1$}~$ = 2$
+	and leaves all other variables unchanged.
+	%(Equivalently, one may call \merge{$3,1,1$}, which leads to the same result.)
+	The algorithm then calls \merge{$4,6,0$}, which sets \Parent{$6$}~$ = 1$, \Weight{$6$}~$ = 0$,
+	\Children{$1$}~$ = \Set{2,3,4,6}$, and leaves all other variables unchanged.
+	See Fig.~\ref{fig:tree3}. 
+
+	Finally, the algorithm terminates upon calling the function \getPartition{$-\infty$} which returns the
+	partition $\mcP = \Set{V}$ of size $k=1$.
+\end{example}
 

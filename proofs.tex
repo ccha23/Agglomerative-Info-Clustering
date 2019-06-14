@@ -1,14 +1,12 @@
 \section{Proofs of main results}
  \label{sec:proof}
  
-
- 
 \begin{Proof}[Theorem~\ref{thm:JT}]
 	Consider $`g_N,\mcP_{N-1}$, and $\mcP_{N}$ as in Proposition~\ref{prop:clusters} and let $h_{`g}$
 	be as in~\eqref{eq:residualH}.
 	By Proposition~\ref{prop:psp},
 	%we have $h_{`g_N}[\mcP_{N-1}] = \hat{h}_{`g_{N}}(V) = h_{`g_{N}}[\mcP_{N}]$. Hence,
-	as shown below, we have for all $C\in \mcP_{N-1}`/\mcP_{N}$ that 
+	as detailed below, we have for all $C\in \mcP_{N-1}`/\mcP_{N}$ that 
 	%Then for all $C\in \mcP_{N-1}`/\mcP_{N}$, we have by Proposition~\ref{prop:psp} (applied to $C$) that 
 	\begin{subequations}
 		\begin{align}
@@ -38,6 +36,7 @@
 	h_{`g_{N}}[\mcP_N]
 	\end{align*}
 	since $\mcP_N$ is optimal to $\hat{h}_{`g_{N}}(V)$~\eqref{eq:DT} by construction.
+	(The notation $h_{`g_{N}}[\cdot]$ is defined in~\eqref{eq:DT:2}.)
 
 	\item To explain ``$\leq$'' for \eqref{eq:dt-gn-a}, note that $\mcP_{N-1}$ is an optimal partition to the
 		Dilworth truncation~\eqref{eq:DT:1} for $`g\in [`g_{N-1},`g_N)$ by Proposition~\ref{prop:psp}.
@@ -106,13 +105,22 @@
 	which is possible because $\abs {C}>1$.
 	We have also applied $\abs {B}=\abs {C}-1$ and the definition of $g_j$ to rewrite the expression in the minimization. %The set of solutions is preserved in the sense that $C^*$ is optimal to \eqref{eq:JT} iff 
 \end{compactitem}
-Consider any optimal solution $j^*$ to the R.H.S.\ of \eqref{eq:gjb}. Then, we have
+Consider any optimal solution $j^*$ to the r.h.s.\ of \eqref{eq:gjb}.
+Then, it follows that $S_{`l}(g_{j^*})$ in~\eqref{eq:S_`l} is such that 
+%\begin{align*}
+%	S_{`l}(g_{j^*}) 
+%	\begin{cases}
+%		\utag{c}\neq `0 & `l=-`g^*\\
+%		\utag{d}= `0 & `l<-`g^*,
+%	\end{cases}
+%\end{align*}
 \begin{align*}
-	S_{`l}(g_{j^*}) 
-	\begin{cases}
-		\utag{c}\neq `0 & `l=-`g^*\\
-		\utag{d}= `0 & `l<-`g^*,
-	\end{cases}
+	\begin{array}{ll}
+		S_{`l}(g_{j^*}) 
+		 \utag{c}\neq `0, & `l=-`g^* \\
+		S_{`l}(g_{j^*}) 
+		 \utag{d}= `0, & `l<-`g^*,
+	\end{array}
 \end{align*}
 where
 \begin{compactitem}
@@ -133,7 +141,7 @@ where
 		g_{j^*}(B)-`l\abs{B} &\geq (-`l-`g^*) \abs {B} && \forall `l\in `R\\
 		& > 0 && \forall `l<-`g^*.
 	\end{alignat*}
-	In other words, for $`l<-`g^*$, we have that $`0$ is the unique solution to $\min_{B\subseteq U_{j^*}} g_{j^*}(B)+`g^*\abs{B}$, which implies \uref{i} by the definition~\eqref{eq:S_`l} of $S_{`l}$.
+	In other words, for $`l<-`g^*$, we have that $`0$ is the unique solution to $\min_{B\subseteq U_{j^*}} g_{j^*}(B)+`g^*\abs{B}$, which implies \uref{d} by the definition~\eqref{eq:S_`l} of $S_{`l}$.
 \end{compactitem}
 Now, \uref{c} and \uref{d} imply that
 \begin{align}
@@ -168,7 +176,7 @@ completes the proof.
 
 \begin{Proof}[Theorem~\ref{thm:`g:P:fused}]
 	First, we prove \eqref{eq:A:`g_l} and \eqref{eq:A:P_i-1} using the general
-	property~\eqref{eq:imunion} instead of the precise definition~\eqref{eq:mmi}. 
+	property~\eqref{eq:imunion} instead of the precise definition~\eqref{eq:mmi} of the MMI. 
 	%
 	
 	We first argue that, for any feasible solution $\mcF$ to the r.h.s.\ of~\eqref{eq:A:`g_l}, 

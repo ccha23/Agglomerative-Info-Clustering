@@ -16,8 +16,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-\title{Agglomerative Info-Clustering:\\ Composing MMI from Total Correlation}
+\title{Agglomerative Info-Clustering:\\ Maximizing Normalized Total Correlation}
 \author{Chung Chan, Ali Al-Bashabsheh and Qiaoqiao Zhou
+  \thanks{Preliminary work of this paper was presented at \cite{chan18aic}.}
 	\thanks{C.\ Chan (corresponding author, email:
           chung.chan@cityu.edu.hk) is with the Department of Computer Science, City University of Hong Kong. His work was supported by a grant
           from the University Grants Committee of the Hong Kong Special Administrative Region,
@@ -40,12 +41,13 @@
 \maketitle
 
 \begin{abstract}
-We show that, under the info-clustering framework, correlated random variables can be clustered more naturally in an agglomerative manner rather than a divisive one. The agglomerative approach successively merges subsets of random variables sharing a large amount of normalized total correlation. Compared to the existing divisive approach that successively segregates the random variables into subsets with increasing multivariate mutual information (MMI), the agglomerative approach gives the same hierarchy of clusters faster by an order of magnitude.  More importantly, the underlying results justifying the agglomerative approach are of theoretical interest since they reveal a fundamental connection between the well-known total correlation and the recently proposed MMI. %We implemented the algorithm with an efficient implementation using a matrix-free data structure for a simple Gaussian model with additive noise.
+We show that, under the info-clustering framework, correlated random variables can be clustered in an agglomerative manner in addition to a divisive one. While the original divisive approach successively segregates the random variables into subsets with increasing multivariate mutual information, our agglomerative approach successively merges subsets of random variables sharing a large amount of normalized total correlation. We implemented the algorithm and showed that it gives the same hierarchy of clusters faster than the divisive approach by an order of magnitude. The equivalence of the two approaches is a fundamental and meaningful connection between the well-known total correlation and the recently proposed measure of multivariate mutual information. 
+%We implemented the algorithm with an efficient implementation using a matrix-free data structure for a simple Gaussian model with additive noise.
 \end{abstract} 
 
-%\begin{keywords}
-%multivariate mutual information; clustering; principal sequence of partitions; principal sequence; minimum norm base
-%\end{keywords}
+\begin{IEEEkeywords}
+multivariate mutual information; agglomerative clustering; principal sequence of partitions; principal sequence; minimum norm base
+\end{IEEEkeywords}
 
 %Suggested notations: $`g_\ell$, $\mcP_{\ell}$, $I^*(\RZ_V)$, $\pzC^*(\RZ_V)$, $\pzC_{`g}(\RZ_V)$, $\mcP^*(\RZ_V)$, $`l^*_i(f)$, $\norm{x_V}$.
 
