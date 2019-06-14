@@ -1,31 +1,68 @@
 \section{Introduction}
 \label{sec:introduction}
 
+%In data mining, there are two approaches to generating a hierarchy of clusters: divisive and agglomerative. The divisive approach starts with the trivial cluster and iteratively breaks a large cluster into smaller ones with maximum separation (minimum similarity). The agglomerative approach starts with the singleton clusters and group smaller clusters with minimum separation (maximum similarity) into a larger cluster. Ideally, if the same measure of separation or similarity is used, the two approaches should be consistent, i.e., return the same hierarchy of clusters as a unique solution. Unfortunately, many measures of separation in use do not give consistent solutions. An example is the complete-linkage method, which measures the separation of two clusters by the furthest distance of points in the two clusters. If the closest distance is used instead of the furthest distance, we have the single-linkage method, which indeed gives a unique hierarchy. However, compared to the complete linkage method, it is known that the single-linkage method cannot capture higher-order linkage between objects. In this work, we consider the info-clustering framework as a meaningful extention of the single-linkage method that can capture higher-order linkage while maintaining consistency of the divisive and agglomerative approaches.
 
-Info-clustering was proposed in \cite{chan16cluster} as a hierarchical
+In hierarchical clustering analysis, there are two methods of generating a hierarchy of clusters~\cite{jain1988algorithms,kaufman2009finding}: divisive and agglomerative. The divisive approach starts with the trivial cluster consisting of all the elements and iteratively breaks a large cluster into smaller ones. The agglomerative approach starts with the singleton clusters instead and group smaller clusters into larger ones. Common to both approaches is the use of a proximity measure that drives the clustering process. For agglomerative clustering, each merging step attempts to minimize the separation (maximize the similarity) of the clusters to be merged. For divisive clustering, each partitioning step attempts to maximize the separation (minimize the similarity) of the resulting clusters. Different measures of proximity may be used, resulting in different algorithms~\cite{sibson1973slink,defays1977efficient,ward1963hierarchical}. Intuitively, if the same measure of proximity is used, divisive and agglomerative methods should return the same clustering solution. Such consistency or duality between divisive and agglomerative clustering is essential for a rigorous hierarchical clustering formulation. However, to the best of our knowledge, such duality is not required for the choice of proximity measures. In other words, many agglomerative clustering algorithms may not have their divisive counterparts and vice versa. An example is the complete-linkage method, where, setting aside the lack of an efficient complete-linkage divisive algorithm, the agglomerative and divisive approaches may result in different hierarchies. Complete-linkage measures the separation between two clusters by the furthest distance of points in the two clusters. If the closest distance is used instead of the furthest distance, we have the single-linkage method, which indeed gives a unique hierarchy and satisfies the desired duality. However, compared to the complete-linkage method, it is known that the single-linkage method cannot capture higher-order linkage between objects. A question of interest is whether there is an extension of the single-linkage method that has consistent divisive and agglomerative counterparts.
+
+% Investigate other proximity measures and cite related works.
+% https://stats.stackexchange.com/questions/195446/choosing-the-right-linkage-method-for-hierarchical-clustering
+
+In this work, we consider the info-clustering framework as a meaningful extension of the single-linkage method that can capture higher-order linkage while maintaining consistency of the divisive and agglomerative approaches. Info-clustering was proposed in \cite{chan16cluster} as a hierarchical
 clustering of random variables (RVs) based on their multivariate mutual information (MMI)~\cite{chan15mi}.
 The hierarchy of clusters is unique and was characterized in~\cite{chan16cluster} as the principal 
 sequence of partitions (PSP)~\cite{narayanan90} of the entropy function of the RVs.  This leads to a
 polynomial-time algorithm~\cite[Algorithm~3]{chan16cluster} that computes the clustering solution in
 $O(n^2 \op{SFM}(n))$ time, where $n$ is the number of RVs and $\op {SFM}(n)$ is the time required to
-minimize a submodular function on a ground set of size $n$. In practice:
+minimize a submodular function on a ground set of size $n$.
+%
+Beyond clustering, the algorithm can be motivated from a purely information-theoretic point of view
+since, as a byproduct, it also computes the MMI of the RVs. The current implementation of the MMI computation~\cite{james-dit} requires an exponential time in $n$. An implementation of the polynomial-time info-clustering algorithm is therefore much desired.
+%
+%Indeed, the algorithm provides a polynomial time compared to the exponential time complexity in~\cite{james-dit} for computing the MMI.%
+%\footnote{It is curious that computing the MMI requires the same time complexity as computing
+% 	the PSP, i.e., the entire clustering solution, however, we are not aware of any faster algorithm for
+% computing the MMI.}
+%
+% As a byproduct, the algorithm computes the MMI of the RVs, and so, beyond clustering, it is aslo
+% motivated from an informatoin theoretic point of view.
+%
+%
+%(Ali) Add citation to DIT package, for a computational approach to information
+%theory. Mention there is implementation of the computation of MMI as well,
+%although the computation is exponential in the number of variables. Argue that
+%the computation can be improved, and in this work, the computation of MMI from
+%optimizing total correlation iteratively is the fastest exact algorithm for
+%computing MMI together with the hierarchy of partition. Interesting, the
+%info-clustering solution can be computed at the same time, without adding
+%additional time complexity to the computation of MMI. Add the contribution that
+%the algorithm has been implement, along with an efficient data structure that
+%represents the hierarchy of clusters.
+%
+
+While one can implement the polynomial-time info-clustering algorithm in~\cite[Algorithm~3]{chan16cluster}, in practice:
 \begin{inparaenum}
 	\item One may want to obtain clusters of a desired size rather than the entire hierarchy of clusters
 	of different sizes. 
 	\item The entropy function needs to be estimated from data, which can be
-	difficult for a large set of random variables~\cite{wu16}. 
+	difficult for a large set of random variables. 
 \end{inparaenum}
-These practical considerations (or issues) motivate the following question. Can we construct an info-clustering
+%
+%(The entropy estimation problem has a long and rich history, we refer the interested reader to \cite{paninski2003estimation, valiant2013estimating, wu16}.)
+%
+% Although the entropy computation / estimation is not within the scope of this work,
+Although this work assumes an oracle for the entropy function,
+these practical considerations (or issues) motivate the following question:
+Can we construct an info-clustering
 algorithm that
 \begin{inparaenum}
-\item[a)] has the same complexity $O(n^2 \op{SFM}(n))$ as above, and
-\item[b)] computes the clusters iteratively according to their sizes? (Due to the 2nd practical
-		consideration, i.e., to reduce the chances of propagating errors arising from unreliable
-		entropy estimations,  it is preferable that the algorithm starts with smaller clusters and proceeds to larger ones.)
+\item[a)] has the same complexity of $O(n^2 \op{SFM}(n))$ as~\cite[Algorithm~3]{chan16cluster}, and
+\item[b)] computes the clusters iteratively according to their sizes?
 \end{inparaenum}
-
-A divisive
-clustering approach was proposed in~\cite[Algorithms~1 \& 2]{chan16cluster} that breaks down the
+Note that due to the 2nd practical consideration, i.e., to reduce the chances of propagating
+errors arising from unreliable entropy estimations,  it is preferable if the iterative
+algorithm starts with smaller clusters and proceeds to larger ones. A divisive
+info-clustering algorithm was given in~\cite[Algorithms~1 \& 2]{chan16cluster} that breaks down the
 %computation by successively dividing the entire set of RVs into increasingly smaller clusters.
 computation by subdividing the entire set of RVs successively into increasingly smaller clusters.
 %However, this slows down the computation of the clustering solution by an order of $n$,
@@ -33,19 +70,31 @@ However, this slows down the clustering-solution computation by an order of $n$ 
 %and does not address the second practical consideration.
 and may also suffer significant error propagations due to the 2nd practical consideration.
 
-The contribution of this work is an affirmative answer to the above question. 
-Namely, we provide an agglomerative algorithm, with the desired complexity, that computes the 
+Another contribution of this work is an affirmative answer to the above question. 
+Namely, we provide an agglomerative counterpart, with the desired complexity, that computes the 
 clusters by grouping the RVs into increasingly larger clusters.
 The idea is inspired by the duality between the PSP and a related structure called the
 principal sequence (PS)~\cite{fujishige80,fujishige05,fujishige-pp-revisited}. We clarify these
 mathematical structures, which leads to a fundamental property connecting the MMI and the well-known
-Watanabe's total correlation. This result is of interest in its own and can be viewed as a second
-contibution of this work. 
+Watanabe's total correlation. %This result is of interest in its own and can be viewed as another contribution of this work. 
 
-We remark that this work focusses on info-clustering. The clustering problem is a prominent
-one in machine learning with vast literature and several clustering techniques. For a brief survey
+We remark that this work focuses on info-clustering. The clustering problem is a prominent
+one in data mining with vast literature and several clustering techniques. For a brief survey
 on the subject (that compares info-clustering to other clustering methods) we refer the interested
 reader to \cite{chan16cluster} and the references therein.
-%Finally, due to space limitations, we only sketch the proofs here and rely on examples as a more efficient
-%%, under space limitations,
-%way for demonstrating some of the results. Full proofs can be found in~\cite{chan17aic}.
+Finally, similar to existing algorithms for computing the MMI or the info-clustering solution, this work
+assumes the entropy function is readily available. Nevertheless, this work can be viewed as a step towards
+% a more practical implementation since it takes the dimensionality curse faced by several entropy
+% computation / estimation algorithms into consideration. 
+a more practical implementation since it tries to mitigate the effects of the curse of dimensionality, faced by several entropy
+computation / estimation algorithms, by operating in an agglomerative manner. 
+The problem of entropy estimation, or more generally functionals of the probability distribution,
+is well-studied and lies beyond the scope of this work. We refer the interested reader to, e.g.,
+\cite{kozachenko1987sample, paninski2003estimation, valiant2013estimating, wu16} and some of the references therein. 
+
+The paper is organized as follows. We first introduce the info-clustering formulation in Section~\ref{sec:problem} and the divisive approach in Section~\ref{sec:divisive}. Section~\ref{sec:prelim} contains the preliminaries of the submodular optimization techniques for the main results in Section~\ref{sec:agglom}. To demonstrate the feasibility of the agglomerative info-clustering algorithms, we provides an implementation in C++ on GitHub
+\begin{center}
+	\url{https://github.com/ccha23/Agglomerative-Info-Clustering}
+\end{center}
+and a Jupyter notebook that executes the code on Binder~\cite{jupyter2018binder}.
+Section~\ref{sec:data_structure} explains the implementation details, followed by the conclusion in Section~\ref{sec:conclusions}.

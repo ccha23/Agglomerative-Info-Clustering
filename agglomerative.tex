@@ -1,4 +1,5 @@
 \section{Main results}
+\label{sec:agglom}
 
 Instead of the divisive approach, we consider here an agglomerative approach, 
 %Algorithm~\ref{alg:aic}, that computes $`g_{\ell}$ and $\mcP_{\ell}$ iteratively from $\ell=N$
@@ -9,7 +10,7 @@ Algorithm~\ref{alg:aic}, that computes $`g_{\ell}$ and $\mcP_{\ell}$ by iterativ
 %inefficiency of the divisive approach while returning the clusters in order.  In particular, we will
 %show that it suffices to compute
 We will give an efficient implementation (thereby resolving the inefficiency of the divisive
-approach) of the subroutine \Agglomerate in Algorithm~\ref{algo:fuse} that computes $`g_\ell$ and
+approach) of the subroutine \Agglomerate in Algorithm~\ref{algo:fuse}, which computes $`g_\ell$ and
 $\mcP_{\ell-1}$ from $\mcP_{\ell}$ for any $\ell$ (thereby returning the clusters in the desired order).
 In particular, we will show that it suffices to compute
 \begin{subequations}
@@ -55,7 +56,7 @@ with the normalized total correlation~\eqref{eq:JT}, which leads to the desired 
 implementation.
 
 
-\label{sec:results}
+%\label{sec:results}
 %\input{results}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -163,7 +164,7 @@ norm base for \eqref{eq:MNB}. An explicit implementation of \MinNormBase can be 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-To explain Algorithm~\ref{algo:fuse}, we need the following two fundamental results that
+To explain Algorithm~\ref{algo:fuse}, we need the following two results that
 \begin{inparaenum}
 \item 
 relate the last critical value of a set of RVs to the normalized total correlation and,
@@ -180,7 +181,7 @@ skimmed first and read more carefully as we go through the examples.
 
 \begin{Theorem}
 	\label{thm:JT}
-	With $V:= \{1,\ldots, n\}$ and $h$~\eqref{eq:h} denoting the entropy function of $\RZ_V$, let,
+	With $V:= \{1,\ldots, n\}$ and $h$ denoting the entropy function of $\RZ_V$, let,
 	for any $j\in V$,
 	\begin{align*}
 		U_j &:=\Set {i\in V\mid i>j} \kern0em \text{ and } \\ %\text{ assuming $V$ is ordered.}\\
@@ -256,8 +257,12 @@ skimmed first and read more carefully as we go through the examples.
 
 We remark that \eqref{eq:maxJT} and~\eqref{eq:argmaxJT} eliminate the need for minimization over
 partitions in calculating the MMI in~\eqref{eq:I*} and~\eqref{eq:C*}. They serve as an intermediate
-step that leads to \eqref{eq:maxJT:x} and \eqref{eq:argmaxJT:x}, thereby relating the last critical value \eqref{eq:I*} and the last set of clusters 
-\eqref{eq:C*} to the minimum norm base. 
+step that leads to \eqref{eq:maxJT:x} and \eqref{eq:argmaxJT:x},
+thereby relating the last critical value
+%\eqref{eq:I*}
+and last set of clusters 
+%\eqref{eq:C*}
+to the minimum norm base. 
 
 %\begin{Proof}[Sketch for Theorem~\ref{thm:JT}]
 %	
@@ -377,6 +382,7 @@ where $\bigcup \mcF:=\bigcup_{B\in \mcF} B$ for convenience.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{example}
+    \label{eg:thms}
 	%As an illustration of Theorem~\ref{thm:`g:P:fused} (and the agglomerative algorithm), 
 	We now illustrate Theorems~\ref{thm:JT} and \ref{thm:`g:P:fused} using our running
 	example~\eqref{eq:eg-motivate}.

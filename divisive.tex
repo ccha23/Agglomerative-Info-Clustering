@@ -1,4 +1,6 @@
 \section{Divisive approach}
+\label{sec:divisive}
+
 With the laminar structure in Proposition~\ref{prop:clusters}, a divisive algorithm was given in \cite{chan16cluster} to
 compute $`g_\ell$ and $\mcP_{\ell}$ by iteratively producing finer partitions from coarser ones,
 %i.e., from $\ell=1$ to $N$. 
@@ -8,8 +10,9 @@ The following result is instrumental in the devising of such an algorithm.
 \begin{Proposition}[\mbox{\cite[Theorems~5.2 \& 5.3]{chan15mi}, \cite[Theorem~4]{chan16cluster}}]
 	\label{prop:fund:cluster}
 	The optimal partitions achieving the MMI in~\eqref{eq:mmi} together with the trivial partition $\{V\}$ form a
-	lattice w.r.t.\ \eqref{eq:finer}. The minimum/finest optimal partition, denoted 
-	$\mcP^{*}(\RZ_V)$, satisfies 
+	lattice w.r.t.\ \eqref{eq:finer}. The minimum/finest optimal partition,
+	%denoted  $\mcP^{*}(\RZ_V)$, satisfies 
+	called the fundamental partition and denoted by $\mcP^{*}(\RZ_V)$, satisfies 
 	\begin{align*}
 		\mcP^{*}(\RZ_V) \backslash \{\{i\}\mid i\in V\} = \pzC_{I(\RZ_V)}(\RZ_V),
 	\end{align*}
@@ -26,7 +29,7 @@ The following result is instrumental in the devising of such an algorithm.
 Because of the last statement in the proposition, any algorithm for computing $\mcP^{*}(\RZ_V)$ can
 be applied iteratively for the divisive info-clustering approach as in~\cite[Algorithm~2]{chan16cluster}.
 However,
-as discussed in Section~\ref{sec:complexity},
+as discussed near the end of~Section~\ref{sec:introduction},
 this divisive approach can be a factor $n$ slower than \cite[Algorithm~3]{chan16cluster}.
 
 \begin{example}
