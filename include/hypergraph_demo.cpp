@@ -2,32 +2,31 @@
 #include <cmath>
 #include <vector>
 #include <random>
-#include "SF.h"
-#include "AIC.h"
+#include <IC/AIC>
 #include <time.h>
 #include <fstream>
 
 using namespace std;
 using namespace Eigen;
+using namespace IC;
 
 int main() {
-	size_t k = 5;
-	double sigma = 1;
-	size_t n = 50;
+	size_t n = 6;
+	size_t m = 4;
 
-	cout << "n = " << n << endl;
-
-	MatrixXd A = MatrixXd::Zero(n, n + k);
-	for (size_t i = 0; i < A.rows(); i++) {
-		A(i, i % k) = 1;
-		A(i, k + i) = sigma;
-	}
-	MatrixXd S = A* A.transpose();
-	//cout << "A=[" << A << "]" << endl;
-	//cout << "S=[" << S << "]" << endl;
+	MatrixXd M = MatrixXd::Zero(n, m);
+	M << 1, 1, 0, 0,
+		 1, 1, 0, 0,
+		 1, 0, 0, 0,
+		 0, 0, 1, 0,
+		 0, 0, 1, 0,
+		 0, 0, 0, 1;
+	
+	cout << "Incidence matrix of the (weighted) hypergraph:" << endl << "M=[" << M << "]" << endl;
 
 	// generate the entropy function
-	GaussianEntropy gsf(S);
+	HypergraphEntropy hsf(M);
+
 	// generate approximate solution via CL tree
 	cout << "Info-clustering by CL tree approximation:" << endl;
 	vector<size_t> first_node, second_node;
@@ -36,7 +35,7 @@ int main() {
 		for (size_t j = 0; j < i; j++) {
 			first_node.push_back(i);
 			second_node.push_back(j);
-			double I = gsf(vector<size_t> {i}) + gsf(vector<size_t> {j}) - gsf(vector<size_t> {i, j});
+			double I = hsf(vector<size_t> {i}) + hsf(vector<size_t> {j}) - hsf(vector<size_t> {i, j});
 			gamma.push_back(I);
 		}
 	}
@@ -50,7 +49,7 @@ int main() {
 
 	// generate the exact info-clustering solution via AIC
 	cout << "Agglomerative info-clustering:" << endl;
-	AIC psp(gsf);
+	AIC psp(hsf);
 	{
 		size_t i = 0;
 		//cout << psp.getPartition(-1) << endl;

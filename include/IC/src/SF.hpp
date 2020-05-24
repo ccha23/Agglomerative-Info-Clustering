@@ -87,6 +87,51 @@ namespace IC {
 		}
 	};
 
+	class HypergraphEntropy : public SF {
+	private:
+		MatrixXd Incidence; // Incidence matrix
+
+	public:
+		/*
+		Construct a submodular function as the entropy function of a hypergraphical source specified by the incidence matrix.
+		@param M Incidence matrix.
+		*/
+		HypergraphEntropy(MatrixXd M) {
+			Incidence = M;
+		}
+		/*
+		Calculate the entropy of a hypergraphical source with a given incidence matrix.
+		@param M Incidence matrix.
+		@return The entropy of the hypergraphical source with incidence matrix M.
+		*/
+		static double h(const MatrixXd &M) {
+			size_t k = M.cols();
+			double ent = 0;
+			for (size_t i = 0; i < k; i++) {
+				ent += M.col(i).maxCoeff();
+			}
+			return ent;
+		}
+
+		/*
+		Calculate the entropy of a hypergraphical source.
+		@param B subvector of elements from the ground set.
+		@return Entropy of the component sources indexed by elements in B.
+		*/
+		double operator() (const vector<size_t> &B) const {
+			size_t n = B.size();
+			MatrixXd M(n, Incidence.cols());
+			for (size_t i = 0; i < n; i++) {
+				M.row(i) = Incidence.row(B[i]);
+			}
+			return h(M);
+		}
+
+		size_t size() const {
+			return Incidence.rows();
+		}
+	};
+
 	/*
 	Find the point in the base polytope of the normalized version of a submodular function
 	that minimizes the weighted sum of coordinates.

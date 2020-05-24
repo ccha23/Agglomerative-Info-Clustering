@@ -2,14 +2,20 @@ CXX=g++
 RM=rm -rf
 CPPFLAGS=-g -std=c++11 -I.
 
-SRCS=
-OBJS=$(subst .cc,.o,$(SRCS))
+gaussian_SRCS=gaussian_demo.cpp 
+hypergraph_SRCS=hypergraph_demo.cpp
 
-all: demo
+gaussian_OBJS=$(subst .cpp,.o,$(gaussian_SRCS))
+hypergraph_OBJS=$(subst .cpp,.o,$(hypergraph_SRCS))
 
-demo: $(OBJS)
-	$(CXX) $(CPPFLAGS) -o demo.out $(OBJS) 
+all: gaussian_demo hypergraph_demo
+
+gaussian_demo: $(gaussian_OBJS)
+	$(CXX) $(CPPFLAGS) -o gaussian_demo.out $(gaussian_OBJS) 
+
+hypergraph_demo: $(hypergraph_OBJS)
+	$(CXX) $(CPPFLAGS) -o hypergraph_demo.out $(hypergraph_OBJS) 
 
 clean:
-	$(RM) $(OBJS) *.dSYM
+	$(RM) $(gaussian_OBJS) $(hypergraph_OBJS) gaussian_demo.out hypergraph_demo.out
 
