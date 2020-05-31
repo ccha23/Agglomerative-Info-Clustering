@@ -4,21 +4,20 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <list>
 #include <math.h>
 #include <queue>
 #include <algorithm>
 #include <numeric>
 #include "SF.hpp"
-
-using namespace std;
+#include <vector>
+#include <Eigen/Dense>
 
 /**
 Represent vectors by strings.
 */
 template <typename T>
 
-std::ostream& operator<<(std::ostream &strm, const vector<T> &v) {
+std::ostream& operator<<(std::ostream &strm, const std::vector<T> &v) {
 	strm << "[ ";
 	for (size_t i = 0, ilen = v.size(); i < ilen; i++)
 		strm << v[i] << " ";
@@ -29,7 +28,7 @@ std::ostream& operator<<(std::ostream &strm, const vector<T> &v) {
 Represent pairs by strings.
 */
 template <typename T1,typename T2>
-std::ostream& operator<<(std::ostream &strm, const pair<T1,T2> &p) {
+std::ostream& operator<<(std::ostream &strm, const std::pair<T1,T2> &p) {
 	return strm << "(" << p.first << ", " << p.second << ")";
 }
 
@@ -39,10 +38,10 @@ Sort the indices of a vector in descending order of the corresponding elements.
 @return The vector of sorted indices.
 */
 template <typename T>
-vector<size_t> sort_indexes(const vector<T> &v) {
+std::vector<size_t> sort_indexes(const std::vector<T> &v) {
 
 	// initialize original index locations
-	vector<size_t> idx(v.size());
+	std::vector<size_t> idx(v.size());
 	iota(idx.begin(), idx.end(), 0);
 
 	// sort indexes based on comparing values in v
@@ -71,7 +70,7 @@ namespace IC {
 				}
 			};
 			size_t head = 0;
-			vector<LinkNode*> lnode;
+			std::vector<LinkNode*> lnode;
 			LinkList(size_t size, size_t mode) {
 				// assume size>0
 				lnode.resize(size);
@@ -122,11 +121,11 @@ namespace IC {
 			}
 		};
 	protected:
-		vector<double> gamma;
-		vector<size_t> parent;
-		vector<vector<size_t> > children;
-		vector<double> weight;
-		vector<size_t> rank;
+		std::vector<double> gamma;
+		std::vector<size_t> parent;
+		std::vector<std::vector<size_t> > children;
+		std::vector<double> weight;
+		std::vector<size_t> rank;
 
 		friend std::ostream& operator<<(std::ostream&, const HC&);
 
@@ -171,7 +170,7 @@ namespace IC {
 	public:
 		HC(size_t n) {
 			if (n < 2)
-				runtime_error("size must be at least 2.");
+				std::runtime_error("size must be at least 2.");
 			parent.resize(n);
 			children.resize(n);
 			weight.resize(n);
@@ -189,23 +188,23 @@ namespace IC {
 		@param gamma similarity threshold.
 		@return The partition P that gives the clusters at threshold gamma.
 		*/
-		vector<vector<size_t> > getPartition(double gamma) const {
+		std::vector<std::vector<size_t> > getPartition(double gamma) const {
 			LinkList* to_cluster = new LinkList(weight.size(),1);
-			vector<vector<size_t>> clusters;
+			std::vector<std::vector<size_t>> clusters;
 			do {
-				queue<pair<size_t, size_t>> to_search;
-				vector<size_t> cluster;
-				to_search.push(make_pair(to_cluster->head, to_cluster->head));
+				std::queue<std::pair<size_t, size_t>> to_search;
+				std::vector<size_t> cluster;
+				to_search.push(std::make_pair(to_cluster->head, to_cluster->head));
 				while (!to_search.empty()) {
-					pair<size_t, size_t> p = to_search.front();
+					std::pair<size_t, size_t> p = to_search.front();
 					size_t i = p.second;
 					size_t j = parent[i];
 					if (j != i && j != p.first && weight[i] > gamma) {
-						to_search.push(make_pair(i,j));
+						to_search.push(std::make_pair(i,j));
 					}
 					for (auto j : children[i]) {
 						if (j != p.first && weight[j] > gamma) {
-							to_search.push(make_pair(i, j));
+							to_search.push(std::make_pair(i, j));
 						}
 					}
 					cluster.push_back(i);
@@ -252,7 +251,7 @@ namespace IC {
 		@param j node label.
 		@return The vector of critical values in descending order.
 		*/
-		vector<double> getCriticalValues() {
+		std::vector<double> getCriticalValues() {
 			return gamma;
 		}
 	};
@@ -266,10 +265,10 @@ namespace IC {
 			size_t j;
 			SF__(SF &f, size_t j) : f(f), j(j) {
 			}
-			double operator() (const vector<size_t> &B) const {
+			double operator() (const std::vector<size_t> &B) const {
 				size_t n = f.size();
 				size_t m = B.size();
-				vector<size_t> B_(m + 1);
+				std::vector<size_t> B_(m + 1);
 				for (size_t i = 0; i < m; i++) {
 					if (B[i] < j) {
 						B_[i] = B[i];
@@ -287,10 +286,10 @@ namespace IC {
 		// for B subset {0,...,n-1}
 		struct SF_ : SF {
 			SF &f;
-			vector<vector<size_t> > P;
-			vector<double> fi;
+			std::vector<std::vector<size_t> > P;
+			std::vector<double> fi;
 
-			SF_(SF &f, vector<vector<size_t> > P) : f(f), P(P) {
+			SF_(SF &f, std::vector<std::vector<size_t> > P) : f(f), P(P) {
 				size_t n = P.size();
 				fi.resize(n);
 				for (size_t i = 0; i < n; i++) {
@@ -302,18 +301,18 @@ namespace IC {
 				P.resize(n);
 				fi.resize(n);
 				for (size_t i = 0; i<n; i++) {
-					P[i] = vector<size_t>{ i };
+					P[i] = std::vector<size_t>{ i };
 					fi[i] = f(P[i]);
 				}
 			}
-			double operator() (const vector<size_t> &B) const {
+			double operator() (const std::vector<size_t> &B) const {
 				size_t n = P.size();
 				size_t m = B.size();
-				vector<size_t> B_;
+				std::vector<size_t> B_;
 				double ss = 0;
 				for (size_t i = 0; i < m; i++) {
 					size_t i_ = B[i];
-					//if (i_<0 || i_ >= n) throw runtime_error("B must be a subset of the ground set.");
+					//if (i_<0 || i_ >= n) throw std::runtime_error("B must be a subset of the ground set.");
 					B_.insert(B_.end(), P[i_].begin(), P[i_].end());
 					ss += fi[i_];
 				}
@@ -339,25 +338,25 @@ namespace IC {
 		*/
 		bool agglomerate(double fn_tol, double eps) {
 			double gamma = -INFINITY;
-			vector<vector<size_t>> P=this->getPartition(gamma);
+			std::vector<std::vector<size_t>> P=this->getPartition(gamma);
 			if (P.size() <= 1) return false;
 			SF_ f_(f,P);
 			size_t k = P.size();
-			//cout << "P : " << P << endl;
-			vector<VectorXd> x(k - 1);
+			//std::cout << "P : " << P << endl;
+			std::vector<Eigen::VectorXd> x(k - 1);
 			for (size_t j = 1; j < k; j++) {
 				SF__ f__(f_, j);
-				//cout << "j : " << j << endl;
+				//std::cout << "j : " << j << endl;
 				x[j-1] = min_norm_base(f__,fn_tol,eps);
-				//cout << x[j - 1];
-				gamma = max(gamma, -(x[j-1].minCoeff()));
+				//std::cout << x[j - 1];
+				gamma = std::max(gamma, -(x[j-1].minCoeff()));
 			}
-			//cout << "gamma : " << gamma << endl;
+			//std::cout << "gamma : " << gamma << endl;
 			for (size_t j = 1; j < k; j++) {
 				for (size_t i = 0; i < j; i++) {
-					//cout << x[j - 1](i) << endl;
+					//std::cout << x[j - 1](i) << endl;
 					if (x[j - 1](i) <= -gamma + fn_tol) // instead of eps, = is required to handle -INFINITY
-						//cout << "fusing " << P[j][0] << " " << P[i][0] << endl;
+						//std::cout << "fusing " << P[j][0] << " " << P[i][0] << endl;
 						merge(P[j][0], P[i][0], gamma);
 				}
 			}
@@ -382,13 +381,13 @@ namespace IC {
 		@param gamma Vector of the weights of the edges.
 		@return The PSP of the graph.
 		*/
-		CL(size_t n, vector<size_t> first_node, vector<size_t> second_node, vector<double> gamma) : HC(n) {
+		CL(size_t n, std::vector<size_t> first_node, std::vector<size_t> second_node, std::vector<double> gamma) : HC(n) {
 			size_t i = 0, ilen = gamma.size(), edge_count=0;
 			if (first_node.size() != ilen || second_node.size() != ilen)
-				runtime_error("Input vectors must have same length.");
+				std::runtime_error("Input vectors must have same length.");
 			for (auto i : sort_indexes(gamma)) {
 				if (first_node[i] >= n || second_node[i] >= n)
-					runtime_error("node index must be smaller than size.");
+					std::runtime_error("node index must be smaller than size.");
 				if (gamma[i]>0) {
 					if (merge(first_node[i], second_node[i], gamma[i]))
 						edge_count++;
