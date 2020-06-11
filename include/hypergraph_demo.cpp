@@ -8,18 +8,28 @@ using namespace Eigen;
 using namespace IC;
 
 int main() {
-	size_t n = 6;
-	size_t m = 4;
+// 	size_t n = 6;
+// 	size_t m = 4;
 
-	MatrixXd M(n, m);
-	M << 1, 1, 0, 0,
-		 1, 1, 0, 0,
-		 1, 0, 0, 0,
-		 0, 0, 1, 0,
-		 0, 0, 1, 0,
-		 0, 0, 0, 1;
-	
-// 	cout << "Incidence matrix of the (weighted) hypergraph:" << endl << "M= \n" << M << endl;
+// 	MatrixXd M(n, m);
+// 	M << 1, 1, 0, 0,
+// 		 1, 1, 0, 0,
+// 		 1, 0, 0, 0,
+// 		 0, 0, 1, 0,
+// 		 0, 0, 1, 0,
+// 		 0, 0, 0, 1;
+
+	size_t n = 6;
+	size_t m = 3;    
+    
+    MatrixXd M(n,m);
+	M << 1, 0, 1,
+		 1, 1, 0,
+		 0, 1, 1,
+		 1, 0, 0,
+		 0, 1, 0,
+		 0, 0, 1;
+	cout << "Incidence matrix of the (weighted) hypergraph:" << endl << "M= \n" << M << endl;
 
 	// generate the entropy function
 	HypergraphEntropy hsf(M);
