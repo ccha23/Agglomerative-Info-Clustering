@@ -1,13 +1,5 @@
-#include <cmath>
-#include <vector>
-#include <random>
-#include <time.h>
-#include <fstream>
-
-#include <iostream>
-#include <Eigen/Dense>
-
 #include <IC/AIC>
+#include <IC/ChowLiu>
 #include <IC/FLS>
 
 using namespace std;
@@ -15,24 +7,34 @@ using namespace Eigen;
 using namespace IC;
 
 int main(){
-	size_t n = 4;
-	size_t m = 3;
 	int pField = 2;
 	int kField = 1;
-	MatrixXd M = MatrixXd :: Zero(n,m);
-	M <<
-		1, 0, 0,
-		0, 1, 0,
-		1, 1, 0, 
-		0, 0, 1;
-	//MatrixXd MM = M.transpose(); M = MM;
-	cout << "M = [" << endl << M << "]" << endl;
+
+	size_t m = 4;
+	size_t n0 = 1, n1 = 1, n2 = 1, n3 = 2;
+	MatrixXd M0(n0,m);
+	MatrixXd M1(n1,m);
+	MatrixXd M2(n2,m);
+	MatrixXd M3(n3,m);
+	M0 << 1,0,0,0;
+	M1 << 0,1,0,0;  
+	M2 << 1,1,0,0,
+	M3 << 1,1,1,0,
+          1,1,1,1;
+// 	cout << "M0 = \n" << M0 << endl;
+// 	cout << "M1 = \n" << M1 << endl;
+// 	cout << "M2 = \n" << M2 << endl;
+// 	cout << "M3 = \n" << M3 << endl;
+
+	vector<MatrixXd> V;
+	V = {M0,M1,M2,M3};
+
 
   	pari_init(1000000,2);
 
 	// generate the entropy function
-	FiniteLinearEntropy fsf(M,pField,kField);
-
+	FiniteLinearEntropy fsf(V,pField,kField);
+	size_t n = V.size();
 
 	// generate approximate solution via CL tree
 	cout << "Info-clustering by CL tree approximation:" << endl;

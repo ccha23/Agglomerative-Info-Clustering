@@ -1,17 +1,7 @@
 #ifndef _FLS_h_included_
 #define _FLS_h_included_
 
-#define _USE_MATH_DEFINES
-#include <cmath>
-#include <numeric>
-#include <iostream>
-#include <vector>
-#include <Eigen/Dense>
-
 #include <pari/pari.h>
-
-// using namespace std;
-// using namespace Eigen;
 
 namespace IC { 
     long grank(Eigen::MatrixXd A, int p, int k)
@@ -19,7 +9,7 @@ namespace IC {
       GEN p1;	  /* vec */
       size_t n_cols = A.cols();
       size_t n_rows = A.rows();
-      p1 = cgetg(n_cols+1, t_MAT); // p1 = cgetg(4, t_MAT);
+      p1 = cgetg(n_cols+1, t_MAT);
       for(size_t i = 0; i < n_cols; i++){ 
          gel(p1, i+1) = cgetg(n_rows+1, t_COL);
       }
@@ -33,41 +23,41 @@ namespace IC {
 
 
       GEN M; 
-    //  GEN T = ffinit(stoi(p), k, -1);
-    //  GEN x;
-    //  x = ffgen(T, 1);
-    //  M = gmul(p1, gpowgs(T, 3));
-
       GEN T = ffinit(stoi(p), k, -1);
       T = ffgen(T, -1);
-      //pari_printf("primitive element = %Ps\n ", T);
       M = gmul(p1, gpowgs(T, 0));
 
-    //  // print Matrix 
-    //  for(int i=1; i<=n_rows; i++){
-    //	  printf("\n");
-    //	  for(int j=1; j<=n_cols; j++)
-    //		  pari_printf("%Ps, \t ", gcoeff(M,i,j));
-    //  }; printf("\n");
+//		// check if x^{p^k-1} = 1 and print the FF nonzero elements
+//		pari_printf("sanity check: x^{p^k-1} = %Ps\n", gpowgs(T, pow(p,k)-1));
+//		printf("Field's nonzero elements: ");
+//		for(int i=0; i<pow(p,k)-1; i++)
+//			pari_printf("%Ps,\t ", gpowgs(T, i)); printf("\n");
 
-      //return rank(M);
-        return 0;
+//		// print Matrix 
+//		for(int i=1; i<=n_rows; i++){
+//		printf("\n");
+//		for(int j=1; j<=n_cols; j++)
+//		  pari_printf("%Ps, \t ", gcoeff(M,i,j));
+//		}; printf("\n");
+
+//		std::cout << "r = " << rank(M) << std::endl;
+
+      return rank(M);
     }
     
     class FiniteLinearEntropy : public SF{
 	private:
-		Eigen::MatrixXd LinearMapping; // LinearMapping matrix over the ring Z/mZ, i.e., entries from {0, ..., m-1}
+		std::vector<Eigen::MatrixXd> LinearMappings; // LinearMapping matrix over the ring Z/mZ, i.e., entries from {0, ..., m-1}
 
 	public:
 		int pField;
 		int kField;
 		/*
-		Construct a submodular function as the entropy function of a hypergraphical source specified by the incidence matrix.
-		@param M LinearMapping is a |V| x |S| matrix s.t. Z_V = M * X_S, X_i i\in
-S are independent and uniformly distributed over Z/qZ
+		Construct a submodular function as the entropy function of a finite linear source specified by a vector of linear mappings.
+		@param V a vector of LinearMapping M0, M1, ... where Mi is a matrix s.t. the features of i are given by z_i = M_i * x for x independent and uniformly distributed over GF(p,k).
 		*/
-		FiniteLinearEntropy(Eigen::MatrixXd M, int p, int k) {
-			LinearMapping = M;
+		FiniteLinearEntropy(std::vector<Eigen::MatrixXd> V, int p, int k) {
+			LinearMappings = V;
 			pField = p;
 			kField = k;
 		}
@@ -87,16 +77,23 @@ S are independent and uniformly distributed over Z/qZ
 		@return Entropy of the component sources indexed by elements in B.
 		*/
 		double operator() (const std::vector<size_t> &B) const {
-			size_t n = B.size();
-			Eigen::MatrixXd M(n, LinearMapping.cols());
-			for (size_t i = 0; i < n; i++) {
-				M.row(i) = LinearMapping.row(B[i]);
+			size_t n_rows = 0;
+			for (size_t i=0; i<B.size(); i++){
+				n_rows += LinearMappings[B[i]].rows();
 			}
+			Eigen::MatrixXd M(n_rows, LinearMappings[0].cols());
+			size_t idx_rows = 0;
+			for (size_t i=0; i<B.size(); i++)
+				for (size_t j = 0; j<LinearMappings[B[i]].rows(); j++){
+					M.row(idx_rows) = LinearMappings[B[i]].row(j);
+					idx_rows++;
+			}
+			//std::cout << "Concatenated Mappings = \n" << M << std::endl;
 			return h(M,pField,kField);
 		}
 
 		size_t size() const {
-			return LinearMapping.rows();
+			return LinearMappings.size();
 		}
 	};
 

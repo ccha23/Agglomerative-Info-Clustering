@@ -2,4 +2,4 @@
 #include <Eigen/Core>
 #include <Eigen/Cholesky>
 #include "src/Core.hpp"
-#include "src/AIC.hpp"
+#include "src/ChowLiu.hpp"

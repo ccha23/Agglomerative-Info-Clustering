@@ -10,7 +10,7 @@ gaussian_OBJS=$(subst .cpp,.o,$(gaussian_SRCS))
 hypergraph_OBJS=$(subst .cpp,.o,$(hypergraph_SRCS))
 fls_OBJS=$(subst .cpp,.o,$(fls_SRCS))
 
-all: gaussian_demo hypergraph_demo
+all: gaussian_demo hypergraph_demo fls_demo
 
 gaussian_demo: $(gaussian_OBJS)
 	$(CXX) $(CPPFLAGS) -o gaussian_demo.out $(gaussian_OBJS) 

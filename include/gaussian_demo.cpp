@@ -1,14 +1,10 @@
-#define _USE_MATH_DEFINES
-#include <cmath>
-#include <vector>
-#include <random>
 #include <IC/AIC>
-#include <time.h>
-#include <fstream>
+#include <IC/ChowLiu>
+#include <IC/gaussian>
 
 using namespace std;
 using namespace Eigen;
-using namespace IC;
+using namespace IC;      
 
 int main() {
 	size_t k = 5;
@@ -23,8 +19,9 @@ int main() {
 		A(i, k + i) = sigma;
 	}
 	MatrixXd S = A* A.transpose();
-	//cout << "A=[" << A << "]" << endl;
-	//cout << "S=[" << S << "]" << endl;
+    cout << "Covariance matrix S = A * A' :" << endl;
+	cout << "S= \n" << S << endl;
+    cout << "where A= \n" << A << endl;
 
 	// generate the entropy function
 	GaussianEntropy gsf(S);
@@ -64,4 +61,6 @@ int main() {
 	for (double gamma : psp.getCriticalValues()) {
 		cout << "partition at threshold " << gamma << ":" << psp.getPartition(gamma) << endl;
 	}
+    
+    cout << std::log(10) << " vs " << log(10) << endl;
 }

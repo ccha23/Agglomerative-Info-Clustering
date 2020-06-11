@@ -1,10 +1,7 @@
-#define _USE_MATH_DEFINES
-#include <cmath>
-#include <vector>
-#include <random>
 #include <IC/AIC>
-#include <time.h>
-#include <fstream>
+#include <IC/ChowLiu>
+#include <IC/hypergraph>
+
 
 using namespace std;
 using namespace Eigen;
@@ -14,7 +11,7 @@ int main() {
 	size_t n = 6;
 	size_t m = 4;
 
-	MatrixXd M = MatrixXd::Zero(n, m);
+	MatrixXd M(n, m);
 	M << 1, 1, 0, 0,
 		 1, 1, 0, 0,
 		 1, 0, 0, 0,
@@ -22,7 +19,7 @@ int main() {
 		 0, 0, 1, 0,
 		 0, 0, 0, 1;
 	
-	cout << "Incidence matrix of the (weighted) hypergraph:" << endl << "M=[" << M << "]" << endl;
+// 	cout << "Incidence matrix of the (weighted) hypergraph:" << endl << "M= \n" << M << endl;
 
 	// generate the entropy function
 	HypergraphEntropy hsf(M);

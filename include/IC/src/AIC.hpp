@@ -1,260 +1,190 @@
 #ifndef _AIC_h_included_
 #define _AIC_h_included_
 
-#include <iostream>
-#include <string>
-#include <vector>
-#include <math.h>
-#include <queue>
-#include <algorithm>
-#include <numeric>
-#include "SF.hpp"
-#include <vector>
-#include <Eigen/Dense>
-
-/**
-Represent vectors by strings.
-*/
-template <typename T>
-
-std::ostream& operator<<(std::ostream &strm, const std::vector<T> &v) {
-	strm << "[ ";
-	for (size_t i = 0, ilen = v.size(); i < ilen; i++)
-		strm << v[i] << " ";
-	return strm << "]";
-}
-
-/**
-Represent pairs by strings.
-*/
-template <typename T1,typename T2>
-std::ostream& operator<<(std::ostream &strm, const std::pair<T1,T2> &p) {
-	return strm << "(" << p.first << ", " << p.second << ")";
-}
-
-/**
-Sort the indices of a vector in descending order of the corresponding elements.
-@param v vector
-@return The vector of sorted indices.
-*/
-template <typename T>
-std::vector<size_t> sort_indexes(const std::vector<T> &v) {
-
-	// initialize original index locations
-	std::vector<size_t> idx(v.size());
-	iota(idx.begin(), idx.end(), 0);
-
-	// sort indexes based on comparing values in v
-	sort(idx.begin(), idx.end(),
-		[&v](size_t i1, size_t i2) {return v[i1] > v[i2]; });
-
-	return idx;
-}
-
 namespace IC { 
-
-	/**
-	HC is a data structure that records the solution of an agglomerative clustering algorithm. It provides the function
-	merge to construct the clustering solution, and the functions getPartition, getCriticalValues and similarity to retrieve
-	information about the clusters.
+    
+    /*
+	Find the point in the base polytope of the normalized version of a submodular function
+	that minimizes the weighted sum of coordinates.
+	@param f The submodular function
+	@param w The weight vector with length equal to that of the ground set of f.
+	@return The vector x in B(f-f(emptySet)) such w'x is minimized.
 	*/
-	class HC {
-		// Use custom doubly linked list to have constant time deletion and search.
-		struct LinkList {
-			struct LinkNode {
-				size_t key, prev, next;
-				LinkNode(size_t k, size_t p, size_t n) {
-					key = k;
-					prev = p;
-					next = n;
-				}
-			};
-			size_t head = 0;
-			std::vector<LinkNode*> lnode;
-			LinkList(size_t size, size_t mode) {
-				// assume size>0
-				lnode.resize(size);
-				switch (mode)
-				{
-				case 0: // isolated nodes
-					for (size_t i = 0; i < size; i++) {
-						lnode[i] = new LinkNode(i, i, i);
-					}
-					break;
-				case 1: // linked nodes
-					if (size > 1) {
-						lnode[0] = new LinkNode(0, 0, 1);
-						for (size_t i = 1; i < size-1; i++) {
-							lnode[i] = new LinkNode(i, i - 1, i + 1);
-						}
-						lnode[size-1] = new LinkNode(size - 1, size - 2, size - 1);
-					} else {
-						lnode[0] = new LinkNode(0, 0, 0);
-					}
-					break;
-				}
-
-			}
-			~LinkList() {
-				for (size_t i = 1, ilen = lnode.size(); i<ilen; i++) {
-					delete lnode[i];
-				}
-			}
-			void remove(size_t i) {
-				if (head != i) { // ignore if attempt to remove head
-					size_t prev = lnode[i]->prev;
-					size_t next = lnode[i]->next;
-					if (prev != i) {
-						lnode[prev]->next = (next != i? next : prev);
-						lnode[i]->prev = i;
-					}
-					if (next != i) {
-						lnode[next]->prev = (prev !=i ? prev : next);
-						lnode[i]->next = i;
-					}
-				}
-			}
-			bool next() {
-				if (lnode[head]->next == head) return false;
-				head = lnode[head]->next;
-				return true;
-			}
-		};
-	protected:
-		std::vector<double> gamma;
-		std::vector<size_t> parent;
-		std::vector<std::vector<size_t> > children;
-		std::vector<double> weight;
-		std::vector<size_t> rank;
-
-		friend std::ostream& operator<<(std::ostream&, const HC&);
-
-		/**
-		Find the current cluster label of a node. O(log(|V|)) time.
-		@param i node label.
-		@return The current cluster label of node i.
-		*/
-		size_t find(size_t i) const {
-			return (parent[i]==i) ? i : find(parent[i]);
+	Eigen::VectorXd edmonds_greedy(const SF &f, const Eigen::VectorXd &w) {
+		size_t n = f.size();
+		if (n != w.size())
+			throw std::runtime_error("w must have the same size as the ground set of f.");
+		std::vector<size_t> idx(n);
+		Eigen::VectorXd x(n);
+		iota(idx.begin(), idx.end(), 0);
+		sort(idx.begin(), idx.end(), [&](size_t i1, size_t i2) {return w[i1] < w[i2]; });
+		std::vector<size_t> B;
+		double F = f(B);
+		for (auto i : idx) {
+			x[i] = -F;
+			B.push_back(i);
+			F = f(B);
+			x[i] += F;
 		}
+		return x;
+	}
 
-		/**
-		Merge nodes i and j into the same cluster for all threshold values strictly smaller than gamma. 
-		Complexity: O(log n).
-		@param i node label.
-		@param j node label.
-		@param gamma similarity level.
-		@return true if a merge is done, i.e., i and j were not connected before.
-		*/
-		bool merge(size_t i, size_t j, double gamma)  {
-			size_t iroot = find(i);
-			size_t jroot = find(j);
-			if (iroot == jroot) return false; // i and j already merged
-			if (this->gamma.empty() || this->gamma.back() > gamma) {
-				this->gamma.push_back(gamma); // update the list of critical values of similarity thresholds
-			}
-			if (rank[iroot] <= rank[jroot]) {
-				parent[iroot] = jroot;
-				children[jroot].push_back(iroot);
-				weight[iroot] = gamma;
-				if (rank[iroot] == rank[jroot])
-					rank[jroot] += 1;
-			} else {
-				parent[jroot] = iroot;
-				children[iroot].push_back(jroot);
-				weight[jroot] = gamma;
-			}
-			return true;
+	/*
+	Compute the minimum norm base in the base polytope of the normalized version of a submodular function
+	with specified tolerance and precision. N.b., set function tolerance to 1E-6 or above due to the numerical issue with Eigen.
+	@param f The submodular function
+	@param fn_tol Function Tolerance
+	@param eps Precision
+	@return The minimum norm point of the base B(f-f(emptySet)).
+	*/
+	Eigen::VectorXd min_norm_base(const SF &f, double fn_tol, double eps) {
+		size_t n = f.size();
+		Eigen::VectorXd x;
+		if (n < 1)
+			return x;
+		x = Eigen::VectorXd::Ones(n);
+		if (n == 1) {
+			std::vector<size_t> V(n);
+			iota(V.begin(), V.end(), 0);
+			return x*f(V);
 		}
+		// Step 0 (Initialize a trivial corral Q and x=Nr Q)
+		x = edmonds_greedy(f, x);
+		//std::cout << f(std::vector<size_t> {0, 1}) - f(std::vector<size_t> {0}) << std::endl;
+		//std::cout << x.transpose() << std::endl;
+		Eigen::MatrixXd Q(n, n + 1);
+		Q.col(0) = x;
+		size_t numCorral = 1; // Corral: First numCorral columns of Q
 
-	public:
-		HC(size_t n) {
-			if (n < 2)
-				std::runtime_error("size must be at least 2.");
-			parent.resize(n);
-			children.resize(n);
-			weight.resize(n);
-			rank.resize(n);
-			for (size_t i = 0; i < n; i++) {
-				parent[i] = i;
-				weight[i] = -INFINITY;
-				rank[i] = 0;
+		Eigen::VectorXd w = Eigen::VectorXd::Zero(n + 1);
+		w(0) = 1; // maintain x == Q * w
+
+				// initialization for adaptive computation of the projection to affine hull of the corral
+		Eigen::VectorXd e = Eigen::VectorXd::Ones(n + 1);
+		Eigen::MatrixXd L = Eigen::MatrixXd::Zero(n + 1, n + 1);
+		L(0, 0) = std::sqrt(1 + x.dot(x));	// maintain L*L.transpose() == e*e.transpose() + Q.transpose() * Q
+										// for the first numCorral rows and columns.
+		double old_first_order_opt,first_order_opt = INFINITY;
+		size_t stuck_count;
+		while (1) {
+			// Step 1 (Major cycle: move towards origin along the direction of x)
+			Eigen::VectorXd q = edmonds_greedy(f, x);
+			old_first_order_opt = first_order_opt;
+			first_order_opt = std::abs(x.dot(q) - x.dot(x));
+			//log<LOG_INFO>(L"[min_norm_base] First order optimality : %1% ") % first_order_opt;
+			// stopping criteria
+			if (first_order_opt < fn_tol) { 
+				return x; // x separates the base polytope from the origin and is therefore the minimum norm point.
 			}
-		}
-
-		/**
-		Return the partition P of V, the non-singleton elements of which are the clusters at threshold gamma.
-		Complexity: O(n).
-		@param gamma similarity threshold.
-		@return The partition P that gives the clusters at threshold gamma.
-		*/
-		std::vector<std::vector<size_t> > getPartition(double gamma) const {
-			LinkList* to_cluster = new LinkList(weight.size(),1);
-			std::vector<std::vector<size_t>> clusters;
-			do {
-				std::queue<std::pair<size_t, size_t>> to_search;
-				std::vector<size_t> cluster;
-				to_search.push(std::make_pair(to_cluster->head, to_cluster->head));
-				while (!to_search.empty()) {
-					std::pair<size_t, size_t> p = to_search.front();
-					size_t i = p.second;
-					size_t j = parent[i];
-					if (j != i && j != p.first && weight[i] > gamma) {
-						to_search.push(std::make_pair(i,j));
-					}
-					for (auto j : children[i]) {
-						if (j != p.first && weight[j] > gamma) {
-							to_search.push(std::make_pair(i, j));
-						}
-					}
-					cluster.push_back(i);
-					to_cluster->remove(i);
-					to_search.pop();
+			if (old_first_order_opt <= first_order_opt) { // stuck
+				stuck_count++;
+// 				std::cout << "stuck : " << stuck_count << " " << first_order_opt << std::endl;
+				if (stuck_count > 100) { // avoid getting stuck for too long
+					std::cerr << "Unstuck at gap to optimality: " << first_order_opt << std::endl;
+					return x;
 				}
-				clusters.push_back(cluster);
-			} while (to_cluster->next());
-			return clusters;
-		}
-
-		/**
-		Return the similarity of node i and j. 
-		Complexity: O(log n).
-		@param i node label.
-		@param j node label.
-		@return The similarity of node i and j.
-		*/
-		double similarity(size_t i, size_t j) const {
-			if (i == j) {
-				return INFINITY;
-			} 
-			else if (parent[i] == i && parent[j] == j) { // not necessary if the disjoint-set forest is connected, i.e., is a tree.
-				return 0;
-			}
-			else if (parent[i] == j) {
-				return weight[i];
-			} 
-			else if (parent[j] == i) {
-				return weight[j];
-			}
-			else if (weight[i] >= weight[j]) {
-				return similarity(parent[i], j);
 			}
 			else {
-				return similarity(parent[j], i);
+				stuck_count = 0;
+			}
+			{
+				// Step 2 (Major cycle: project to affine hull)
+				auto L_ = L.topLeftCorner(numCorral, numCorral).triangularView<Eigen::Lower>();
+				auto Q_ = Q.topLeftCorner(n, numCorral);
+				auto e_ = e.topRows(numCorral);
+				Eigen::VectorXd r = L_.solve(e_ + Q_.transpose() * q);
+				L.block(numCorral, 0, 1, numCorral) = r.transpose();
+				L(numCorral, numCorral) = 1 + q.dot(q) - r.dot(r);
+				//std::cout << "Optimality test:" << std::endl;
+				//std::cout << "x : " << x.transpose() << std::endl;
+				//std::cout << "q : " << q.transpose() << std::endl;
+				//std::cout << "Q : " << std::endl << Q_ << std::endl;
+				if (1 + q.dot(q) - r.dot(r) < 0) {
+					//std::cout << "Update L to include q:" << std::endl;
+					//std::cout << "L: " << std::endl << (Eigen::MatrixXd) L_ << std::endl;
+					//std::cout << "r: " << r.transpose() << std::endl;
+					throw std::runtime_error("Try to set a higher functional tolerance.");
+				}
+				L(numCorral, numCorral) = sqrt(1 + q.dot(q) - r.dot(r));
+				Q.col(numCorral++) = q;
+			}
+			int minor_cycle_count = 0; // count number of iterations of minor cycles in iteration of the major cycle 
+			while (1) {
+				minor_cycle_count = minor_cycle_count + 1;
+				auto L_ = L.topLeftCorner(numCorral, numCorral).triangularView<Eigen::Lower>();
+				auto Q_ = Q.topLeftCorner(n, numCorral);
+				auto e_ = e.topRows(numCorral);
+				Eigen::VectorXd v = L_.transpose().solve(L_.solve(e_));
+				v = (e_ * e_.transpose() + Q_.transpose() * Q_).llt().solve(e_); // cc
+				v = v / e_.dot(v);
+				//std::cout << "Affine projection: origin onto aff(Q) " << std::endl;
+				//std::cout << "L : " << std::endl << (Eigen::MatrixXd)L_ << std::endl;
+				//std::cout << "Q : " << std::endl << Q_ << std::endl;
+				//std::cout << "v : " << v.transpose() << std::endl;
+				bool minor_cycle = false;
+				{
+					size_t i = 0;
+					while (!minor_cycle && i < numCorral)
+						minor_cycle = (v(i++) <= eps);
+				}
+				auto w_ = w.topRows(numCorral);
+				if (!minor_cycle) {
+					// continue with Main Cycle
+					w_ = v;
+					x = Q_*w_;
+					//log<LOG_INFO>(L"[min_norm_base] # minor cycles : %1% ") % minor_cycle_count;
+					break;
+				}
+				// Step 3: Minor cycle
+				double theta = 1;
+				for (size_t i = 0; i < numCorral; i++) {
+					if (w_(i) - v(i)>= eps) {
+						theta = std::min(theta, w_(i) / (w_(i) - v(i)));
+					}
+				}
+				w_ = (1 - theta) * w_ + theta *v;
+				size_t i_ = 0;
+				std::vector<bool> toDelete(numCorral);
+				for (size_t i = 0; i < numCorral; i++) {
+					if ((toDelete[i] = (w_(i) <= eps))) {
+						for (size_t j = i; j < numCorral - 1; j++) {
+							// Maintain L triangular after deletion
+							double a = L(j + 1, j), b = L(j + 1, j + 1);
+							double c = sqrt(a*a + b*b);
+							Eigen::Matrix2d T;
+							T << a / c, -b / c, b / c, a / c;
+							L.block(j + 1, j, numCorral - j, 2) *= T;
+						}
+					}
+				}
+				// perform deletion
+				for (size_t i = 0; i < numCorral; i++) {
+					if (!toDelete[i]) {
+						if (i_<i) {
+							w_(i_) = w_(i);
+							Q.col(i_) = Q.col(i);
+							L.row(i_) = L.row(i);
+						} // else, i.e., i_=i : no need to move
+						i_++;
+					} // else: delete ith corral
+				}
+				numCorral = i_;
+				x = Q.topLeftCorner(n, numCorral)*w.topRows(numCorral);
 			}
 		}
-
-		/**
-		Return the set of critical values. 
-		Complexity: O(n).
-		@param i node label.
-		@param j node label.
-		@return The vector of critical values in descending order.
-		*/
-		std::vector<double> getCriticalValues() {
-			return gamma;
-		}
-	};
+		return x;
+	}
+		
+	/*
+	Compute the minimum norm base in the base polytope of the normalized version of a submodular function with
+	the function tolerance 1E-10, optimality tolerance 1E-10 and precision epsilon 1E-15.
+	@param f The submodular function
+	@return The minimum norm point of the base B(f-f(emptySet)).
+	*/
+	Eigen::VectorXd min_norm_base(const SF &f) {
+		return min_norm_base(f, 1E-10, 1E-15);
+	}    
+    
 
 	class AIC : public HC {
 		// for the submodular function f on {0,...,n-1}, and index j in {0,...,n-1}, define
@@ -365,38 +295,6 @@ namespace IC {
 
 		bool agglomerate() {
 			return agglomerate(1E-6, 1E-15);
-		}
-	};
-
-	/**
-	Construct a info-clustering solution by Chow-Liu tree approximation.
-	*/
-	class CL : public HC {
-	public:
-		/**
-		Construct the clusters for a graph given a list of non-negative weighted edges.
-		@param size The size |V| of the graph.
-		@param first_node Vector of first incident nodes of the edges.
-		@param first_node Vector of second incident nodes of the edges.
-		@param gamma Vector of the weights of the edges.
-		@return The PSP of the graph.
-		*/
-		CL(size_t n, std::vector<size_t> first_node, std::vector<size_t> second_node, std::vector<double> gamma) : HC(n) {
-			size_t i = 0, ilen = gamma.size(), edge_count=0;
-			if (first_node.size() != ilen || second_node.size() != ilen)
-				std::runtime_error("Input vectors must have same length.");
-			for (auto i : sort_indexes(gamma)) {
-				if (first_node[i] >= n || second_node[i] >= n)
-					std::runtime_error("node index must be smaller than size.");
-				if (gamma[i]>0) {
-					if (merge(first_node[i], second_node[i], gamma[i]))
-						edge_count++;
-				}
-				if (edge_count >= n - 1) break; // graph is connected
-			}
-			if (edge_count < n - 1) {
-				this->gamma.push_back(0); // 0 is a critical value when the graph is disconnected
-			}
 		}
 	};
 
