@@ -54,10 +54,10 @@ namespace IC {
 		int kField;
 		/*
 		Construct a submodular function as the entropy function of a finite linear source specified by a vector of linear mappings.
-		@param V a vector of LinearMapping M0, M1, ... where Mi is a matrix s.t. the features of i are given by z_i = M_i * x for x independent and uniformly distributed over GF(p,k).
+		@param vecM a vector of LinearMapping M0, M1, ... where Mi is a matrix s.t. the features of i are given by z_i = M_i * x for x independent and uniformly distributed over GF(p,k).
 		*/
-		FiniteLinearEntropy(std::vector<Eigen::MatrixXd> V, int p, int k) {
-			LinearMappings = V;
+		FiniteLinearEntropy(std::vector<Eigen::MatrixXd> M, int p, int k) {
+			LinearMappings = M;
 			pField = p;
 			kField = k;
 		}
@@ -78,7 +78,7 @@ namespace IC {
 		*/
 		double operator() (const std::vector<size_t> &B) const {
 			size_t n_rows = 0;
-			for (size_t i=0; i<B.size(); i++){
+			for (size_t i=0; i<B.size(); i++) {
 				n_rows += LinearMappings[B[i]].rows();
 			}
 			Eigen::MatrixXd M(n_rows, LinearMappings[0].cols());

@@ -58,7 +58,33 @@ namespace IC {
 		/*
 		@return The size of the ground set.
 		*/
-		virtual size_t size() const=0;
+		virtual size_t size() const = 0;
+        
+		/*
+		Compute the mutual information between two disjoint sets of nodes.
+		@param B A subvector of elements of V.
+        @param C A subvector of elements of V\B.
+		@return I(Z_B\wedge Z_C) = h(B) + h(C) - h(B \cup C).
+		*/
+		double mutual_info(const std::vector<size_t> &B, 
+                                   const std::vector<size_t> &C) const {
+            std::vector<size_t> U(B);
+            U.insert( U.end(), C.begin(), C.end() );
+            return operator()(B) + operator()(C) 
+                - operator()(U);
+            
+        }
+        
+		/*
+		Compute the mutual information between two distinct nodes.
+		@param i Node label.
+        @param j Node label.
+		@return I(Z_i\wedge Z_j) = h({i}) + h({j}) - h({i,j}).
+		*/
+		double mutual_info(size_t i, size_t j) const {
+            return operator()(std::vector<size_t> {i}) + operator()(std::vector<size_t> {j}) 
+                - operator()(std::vector<size_t> {i,j});
+        }        
 	};    
     
     /**
@@ -152,22 +178,25 @@ namespace IC {
 		@param i node label.
 		@param j node label.
 		@param gamma similarity level.
-		@return true if a merge is done, i.e., i and j were not connected before.
+		@return true if a merge is done, i.e., i and j were not connected before and gamma is smaller than existing critical values.
 		*/
 		bool merge(size_t i, size_t j, double gamma)  {
 			size_t iroot = find(i);
 			size_t jroot = find(j);
-			if (iroot == jroot) return false; // i and j already merged
-			if (this->gamma.empty() || this->gamma.back() > gamma) {
-				this->gamma.push_back(gamma); // update the list of critical values of similarity thresholds
-			}
+			if (iroot == jroot || // i and j already merged
+               not (this->gamma.empty() || 
+                    this->gamma.back() >= gamma)) // gamma is too large
+                return false;
+            if (this->gamma.empty() || this->gamma.back() > gamma)
+                this->gamma.push_back(gamma); // update the list of distinct critical values
 			if (rank[iroot] <= rank[jroot]) {
+                // make jroot the parent of iroot
 				parent[iroot] = jroot;
 				children[jroot].push_back(iroot);
 				weight[iroot] = gamma;
 				if (rank[iroot] == rank[jroot])
-					rank[jroot] += 1;
-			} else {
+					rank[jroot] += 1; // depth of subtree rooted at jroot increases by 1
+			} else { // make iroot the parent of jroot for a more balanced tree
 				parent[jroot] = iroot;
 				children[iroot].push_back(jroot);
 				weight[jroot] = gamma;
@@ -223,6 +252,45 @@ namespace IC {
 			} while (to_cluster->next());
 			return clusters;
 		}
+        
+		/**
+		Return the coaseast partition of V generated. This is equivalent to getPartition(-INFINITY).
+		Complexity: O(n).
+		@param gamma similarity threshold.
+		@return The partition P that gives the clusters at threshold gamma.
+		*/
+		std::vector<std::vector<size_t> > getCoarsestPartition() const {
+            return getPartition(-INFINITY);
+        }
+        
+        /**
+		Return the cluster containing a node at a similarity threshold.
+		Complexity: O(n).
+        @param i node label.
+		@param gamma similarity threshold.
+		@return The cluster containing node i at threshold gamma.
+		*/
+		std::vector<size_t> getCluster(size_t i, double gamma) const {
+            std::queue<std::pair<size_t, size_t>> to_search;
+            std::vector<size_t> cluster;
+            to_search.push(std::make_pair(i, i));
+            while (!to_search.empty()) {
+                std::pair<size_t, size_t> p = to_search.front();
+                size_t i = p.second;
+                size_t j = parent[i];
+                if (j != i && j != p.first && weight[i] > gamma) {
+                    to_search.push(std::make_pair(i,j));
+                }
+                for (auto j : children[i]) {
+                    if (j != p.first && weight[j] > gamma) {
+                        to_search.push(std::make_pair(i, j));
+                    }
+                }
+                cluster.push_back(i);
+                to_search.pop();
+            }
+			return cluster;
+		}
 
 		/**
 		Return the similarity of node i and j. 
@@ -255,13 +323,31 @@ namespace IC {
 		/**
 		Return the set of critical values. 
 		Complexity: O(n).
-		@param i node label.
-		@param j node label.
 		@return The vector of critical values in descending order.
 		*/
-		std::vector<double> getCriticalValues() {
+		std::vector<double> getCriticalValues() const {
 			return gamma;
 		}
+        
+        /**
+		Return the set of critical values for clusters containing a node.
+		Complexity: O(n).
+		@param i node label.
+		@return The vector of critical values in descending order for clusters containing i.
+		*/
+		std::vector<double> getCriticalValues(size_t i) const {
+            std::vector<double> gamma;
+            for (auto j : children[i]) { // add weights of children
+                if (gamma.empty() || gamma.back() > weight[j])
+                    gamma.push_back(weight[j]);
+            }
+            while (parent[i] != i) { // add weights of ancestors
+                if (gamma.empty() || gamma.back() > weight[i])
+                    gamma.push_back(weight[i]);
+                i = parent[i];
+            }
+			return gamma;
+        }
 	};
 }
 

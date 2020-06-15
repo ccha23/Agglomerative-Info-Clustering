@@ -185,7 +185,9 @@ namespace IC {
 		return min_norm_base(f, 1E-10, 1E-15);
 	}    
     
-
+    /**
+	Construct the exact info-clustering solution using the minimum normal base algorithm.
+	*/
 	class AIC : public HC {
 		// for the submodular function f on {0,...,n-1}, and index j in {0,...,n-1}, define
 		// f_(B) = f(B\cup {j})
@@ -259,7 +261,7 @@ namespace IC {
 		Construct PSP for the submodular function f in an agglomerative fashion.
 		@param f the submodular function.
 		*/
-		AIC(SF &f_) : f(f_), HC::HC(f_.size()) {}
+		AIC(SF &f_) : f(f_), HC(f_.size()) {}
 
 		/**
 		Agglomerate the cluster. Return true if clusters are agglomerated, and false otherwise.

@@ -1,5 +1,1 @@
 #!/bin/bash
-
-# jupyter labextension install @jupyterlab/latex
-# pdflatex main; bibtex main; pdflatex main; pdflatex main; mv main.pdf doc/
-cd ~/include/; make all
