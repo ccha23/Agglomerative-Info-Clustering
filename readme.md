@@ -5,6 +5,7 @@ The above binder link launches a notebook that demonstrates the agglomerative in
 - [Jupyter notebook preview](http://nbviewer.jupyter.org/github/ccha23/Agglomerative-Info-Clustering/blob/master/demo.ipynb)
 - [API documentation](https://ccha23.github.io/Agglomerative-Info-Clustering)
 - [Paper](https://arxiv.org/pdf/1701.04926.pdf)
+- [GitHub repository](https://github.com/ccha23/Agglomerative-Info-Clustering)
 
 ## Installation
 
