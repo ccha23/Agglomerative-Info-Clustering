@@ -17,21 +17,21 @@ Simply download the `include` folder and add it to the include path.
 
 Some examples from the jupyter notebook are also included as `.cpp` files as follows. See the jupyter notebook for more detailed explanations:
 
-- gaussian_demo.cpp performs the exact and approximate clustering algorithm for a jointly gaussian source model. Run using 
+- gaussian_demo.cpp performs the exact and approximate clustering algorithm for a jointly gaussian source model. Run using  
 ```
 make gaussian_demo; ./gaussian_demo.out
 ```
 
-- hypergraph_demo.cpp is an example for hypergraphical source model. Run using
+- hypergraph_demo.cpp is an example for hypergraphical source model. Run using  
 ```
 make hypergraph_demo; ./hypergraph_demo.out
 ```
 
-- fls_demo.cpp is an example for clustering a finite linear source model. It requires the C library pari, which can be installed on ubuntu using
+- fls_demo.cpp is an example for clustering a finite linear source model. It requires the C library pari, which can be installed on ubuntu using  
 ```
 apt-get install libpari-dev
-``` 
-Run the using
+```  
+Run the using  
 ```
 make fls_demo; ./fls_demo.out
 ```
