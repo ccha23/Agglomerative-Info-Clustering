@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.18"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Info-Clustering: Main Page</title>
+<title>Info-Clustering: Member List</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -53,7 +53,6 @@ $(function() {
 });
 /* @license-end */</script>
 <div id="main-nav"></div>
-</div><!-- top -->
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -68,38 +67,24 @@ $(function() {
 </iframe>
 </div>
 
-<div class="PageDoc"><div class="header">
+<div id="nav-path" class="navpath">
+  <ul>
+<li class="navelem"><b>IC</b></li><li class="navelem"><a class="el" href="classIC_1_1SF.html">SF</a></li>  </ul>
+</div>
+</div><!-- top -->
+<div class="header">
   <div class="headertitle">
-<div class="title">Info-Clustering Documentation</div>  </div>
+<div class="title">IC::SF Member List</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="md_readme"></a><a href="https://mybinder.org/v2/gh/ccha23/Agglomerative-Info-Clustering/master?urlpath=lab/tree/demo.ipynb"><img src="https://mybinder.org/badge_logo.svg" alt="Binder" style="pointer-events: none;" class="inline"/></a></p>
-<p>The above binder link launches a notebook that demonstrates the agglomerative info-clustering algorithm (AIC) implemented in C++. It is run using the <a href="https://xeus-cling.readthedocs.io/en/latest/">xeus-cling</a> C++11 jupyter kernel.</p>
-<ul>
-<li><a href="http://nbviewer.jupyter.org/github/ccha23/Agglomerative-Info-Clustering/blob/master/demo.ipynb">Jupyter notebook preview</a></li>
-<li><a href="https://ccha23.github.io/Agglomerative-Info-Clustering">API documentation</a></li>
-<li><a href="https://www.overleaf.com/read/zkkyyxfvbmsc">Paper</a></li>
-</ul>
-<h2><a class="anchor" id="autotoc_md0"></a>
-Installation</h2>
-<p>Simply download the <code>include</code> folder and add it to the include path.</p><ul>
-<li>The source code requires <a href="http://eigen.tuxfamily.org">Eigen C++ library</a>, which is included in <code>include</code> folder.</li>
-<li>To use the finite linear source model, you would need to install <a href="https://pari.math.u-bordeaux.fr"><code>libpari-dev</code></a>. (See the next section.)</li>
-</ul>
-<h2><a class="anchor" id="autotoc_md1"></a>
-Examples</h2>
-<p>Some examples from the jupyter notebook are also included as <code>.cpp</code> files as follows. See the jupyter notebook for more detailed explanations:</p>
-<ul>
-<li>gaussian_demo.cpp performs the exact and approximate clustering algorithm for a jointly gaussian source model. Run using <div class="fragment"><div class="line">make gaussian_demo; ./gaussian_demo.out</div>
-</div><!-- fragment --></li>
-<li>hypergraph_demo.cpp is an example for hypergraphical source model. Run using <div class="fragment"><div class="line">make hypergraph_demo; ./hypergraph_demo.out</div>
-</div><!-- fragment --></li>
-<li>fls_demo.cpp is an example for clustering a finite linear source model. It requires the C library pari, which can be installed on ubuntu using <div class="fragment"><div class="line">apt-get install libpari-dev</div>
-</div><!-- fragment --></li>
-</ul>
-<p>Run the using </p><div class="fragment"><div class="line">make fls_demo; ./fls_demo.out</div>
-</div><!-- fragment --> </div></div><!-- PageDoc -->
-</div><!-- contents -->
+
+<p>This is the complete list of members for <a class="el" href="classIC_1_1SF.html">IC::SF</a>, including all inherited members.</p>
+<table class="directory">
+  <tr class="even"><td class="entry"><a class="el" href="classIC_1_1SF.html#aeac1c2f189fafd801a9b113779a5c5d7">mutual_info</a>(const std::vector&lt; size_t &gt; &amp;B, const std::vector&lt; size_t &gt; &amp;C) const</td><td class="entry"><a class="el" href="classIC_1_1SF.html">IC::SF</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
+  <tr><td class="entry"><a class="el" href="classIC_1_1SF.html#a9365f31ee743ad7ce2baeae39d5ecf1d">mutual_info</a>(size_t i, size_t j) const</td><td class="entry"><a class="el" href="classIC_1_1SF.html">IC::SF</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="classIC_1_1SF.html#a33c1d45e368b291e9f82b5adf36a0c48">operator()</a>(const std::vector&lt; size_t &gt; &amp;B) const =0</td><td class="entry"><a class="el" href="classIC_1_1SF.html">IC::SF</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
+  <tr><td class="entry"><a class="el" href="classIC_1_1SF.html#aeb9f087bd642263dfa6e1a26d9d20c24">size</a>() const =0</td><td class="entry"><a class="el" href="classIC_1_1SF.html">IC::SF</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
+</table></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by &#160;<a href="http://www.doxygen.org/index.html">
