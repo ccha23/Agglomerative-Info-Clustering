@@ -16,7 +16,7 @@ namespace IC {
 			throw std::runtime_error("w must have the same size as the ground set of f.");
 		std::vector<size_t> idx(n);
 		Eigen::VectorXd x(n);
-		iota(idx.begin(), idx.end(), 0);
+		std::iota(idx.begin(), idx.end(), 0);
 		sort(idx.begin(), idx.end(), [&](size_t i1, size_t i2) {return w[i1] < w[i2]; });
 		std::vector<size_t> B;
 		double F = f(B);
@@ -45,7 +45,7 @@ namespace IC {
 		x = Eigen::VectorXd::Ones(n);
 		if (n == 1) {
 			std::vector<size_t> V(n);
-			iota(V.begin(), V.end(), 0);
+			std::iota(V.begin(), V.end(), 0);
 			return x*f(V);
 		}
 		// Step 0 (Initialize a trivial corral Q and x=Nr Q)
