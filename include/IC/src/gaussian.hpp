@@ -11,7 +11,7 @@ namespace IC {
         size_t m, n;
 
 	public:
-		/*
+		/**
 		Construct a submodular function as the entropy function of a gaussian source by a vector of linear mappings.
         
 		@param LinearMappings vector of linear mappings in terms of matrices with the same number of columns.
@@ -25,7 +25,7 @@ namespace IC {
                     throw std::runtime_error("Linear mappings must have the same number of columns.");
             }
         }
-		/*
+		/**
 		Calculate the entropy (in bits) of a gaussian source with a given linear mapping.
 		@param LinearMapping Covariance matrix.
 		@return differential entropy of the gaussian vector generated using the linear mapping LinearMapping.
@@ -47,7 +47,7 @@ namespace IC {
 			return det;
 		}
 
-		/*
+		/**
 		Calculate the entropy (in bits) of a subvector of elements in the ground set.
 		@param B subvector of elements from the ground set.
 		@return Entropy of elements in B.
@@ -76,7 +76,7 @@ namespace IC {
 		Eigen::MatrixXd Sigma; // covariance matrix
 
 	public:
-		/*
+		/**
 		Construct a submodular function as the entropy function of a gaussian random vector with specified covariance matrix.
 		@param S Covariance matrix.
 		*/
@@ -85,7 +85,7 @@ namespace IC {
 			if (Sigma.rows() != Sigma.cols())
 				throw std::runtime_error("S must be an SPD matrix.");
 		}
-		/*
+		/**
 		Calculate the entropy of a gaussian vector with a given covariance matrix.
 		@param S Covariance matrix.
 		@return differential entropy of the gaussian vector with covariance matrix S.
@@ -107,7 +107,7 @@ namespace IC {
 			return det;
 		}
 
-		/*
+		/**
 		Calculate the entropy of a gaussian subvector.
 		@param B subvector of elements from the ground set.
 		@return Entropy of the gaussian subvector indexed by elements in B.

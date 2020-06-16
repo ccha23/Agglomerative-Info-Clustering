@@ -44,27 +44,27 @@ std::vector<size_t> sort_indexes(const std::vector<T> &v) {
 
 namespace IC { 
 
-	/*
+	/**
 	Base functor for submodular function. Ground set V is {0 ... n-1} for some non-negative number n.
 	*/
 	class SF {
 	public:
-		/*
+		/**
 		The value of the submodular function evaluated on a set.
 		@param B A subvector of elements of V.
 		@return The value of the submodular function at B.
 		*/
 		virtual double operator() (const std::vector<size_t> &B) const = 0;
-		/*
+		/**
 		@return The size of the ground set.
 		*/
 		virtual size_t size() const = 0;
         
-		/*
+		/**
 		Compute the mutual information between two disjoint sets of nodes.
 		@param B A subvector of elements of V.
-        @param C A subvector of elements of V\B.
-		@return I(Z_B\wedge Z_C) = h(B) + h(C) - h(B \cup C).
+        @param C A subvector of elements of \f$V\setminus B\f$.
+		@return \f$I(Z_B\wedge Z_C) = h(B) + h(C) - h(B \cup C)\f$.
 		*/
 		double mutual_info(const std::vector<size_t> &B, 
                                    const std::vector<size_t> &C) const {
@@ -75,11 +75,11 @@ namespace IC {
             
         }
         
-		/*
+		/**
 		Compute the mutual information between two distinct nodes.
 		@param i Node label.
         @param j Node label.
-		@return I(Z_i\wedge Z_j) = h({i}) + h({j}) - h({i,j}).
+		@return \f$I(Z_i\wedge Z_j) = h(\{i\}) + h(\{j\}) - h(\{i,j\})\f$.
 		*/
 		double mutual_info(size_t i, size_t j) const {
             return operator()(std::vector<size_t> {i}) + operator()(std::vector<size_t> {j}) 

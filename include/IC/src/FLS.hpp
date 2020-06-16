@@ -52,7 +52,7 @@ namespace IC {
 	public:
 		int pField;
 		int kField;
-		/*
+		/**
 		Construct a submodular function as the entropy function of a finite linear source specified by a vector of linear mappings.
 		@param vecM a vector of LinearMapping M0, M1, ... where Mi is a matrix s.t. the features of i are given by z_i = M_i * x for x independent and uniformly distributed over GF(p,k).
 		*/
@@ -61,7 +61,7 @@ namespace IC {
 			pField = p;
 			kField = k;
 		}
-		/*
+		/**
 		Calculate the entropy of a finite linear source with a given linear mapping matrix.
 		@param M LinearMapping matrix.
 		@return The entropy of the finite linear source with linear mapping matrix M.
@@ -71,7 +71,7 @@ namespace IC {
 			return ent;
 		}
 
-		/*
+		/**
 		Calculate the entropy of a hypergraphical source.
 		@param B subvector of elements from the ground set.
 		@return Entropy of the component sources indexed by elements in B.

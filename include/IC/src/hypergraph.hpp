@@ -8,14 +8,14 @@ namespace IC {
 		Eigen::MatrixXd Incidence; // Incidence matrix
 
 	public:
-		/*
+		/**
 		Construct a submodular function as the entropy function of a hypergraphical source specified by the incidence matrix.
 		@param M Incidence matrix.
 		*/
 		HypergraphEntropy(Eigen::MatrixXd M) {
 			Incidence = M;
 		}
-		/*
+		/**
 		Calculate the entropy of a hypergraphical source with a given incidence matrix.
 		@param M Incidence matrix.
 		@return The entropy of the hypergraphical source with incidence matrix M.
@@ -29,7 +29,7 @@ namespace IC {
 			return ent;
 		}
 
-		/*
+		/**
 		Calculate the entropy of a hypergraphical source.
 		@param B subvector of elements from the ground set.
 		@return Entropy of the component sources indexed by elements in B.
